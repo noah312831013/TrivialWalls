@@ -216,10 +216,6 @@ def train_an_epoch(model, train_data_loader, optimizer, criterion, config, logge
             gt['trivialWalls'] = gt['trivialWalls'].type(torch.float16)
 
         dt = model(imgs)
-
-        gt = gt.to(device, non_blocking=True)
-        dt = dt.to(device, non_blocking=True)
-
         loss, batch_loss_d, epoch_loss_d = calc_criterion(criterion, gt, dt, epoch_loss_d)
         if config.LOCAL_RANK == 0 and config.SHOW_BAR:
             bar.set_postfix(batch_loss_d)
