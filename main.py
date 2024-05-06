@@ -261,7 +261,8 @@ def val_an_epoch(model, val_data_loader, criterion, config, logger, writer, epoc
         'visible_3d': [],
         'full_2d': [],
         'full_3d': [],
-        'height': []
+        'height': [],
+        'trivialWalls': []
     }
 
     epoch_other_d = {
@@ -279,6 +280,8 @@ def val_an_epoch(model, val_data_loader, criterion, config, logger, writer, epoc
         imgs = gt['image'].to(device, non_blocking=True)
         gt['depth'] = gt['depth'].to(device, non_blocking=True)
         gt['ratio'] = gt['ratio'].to(device, non_blocking=True)
+        gt['trivialWalls'] = gt['trivialWalls'].to(device, non_blocking=True)
+
         if 'corner_heat_map' in gt:
             gt['corner_heat_map'] = gt['corner_heat_map'].to(device, non_blocking=True)
         dt = model(imgs)
@@ -311,13 +314,15 @@ def val_an_epoch(model, val_data_loader, criterion, config, logger, writer, epoc
             epoch_other_d['rmse'].append(rmse)
             epoch_other_d['delta_1'].append(delta_1)
 
-        visb_iou, full_iou, iou_height, pano_bds, full_iou_2ds = calc_accuracy(tensor2np_d(dt), tensor2np_d(gt),
+        visb_iou, full_iou, iou_height, pano_bds, full_iou_2ds ,TW = calc_accuracy(tensor2np_d(dt), tensor2np_d(gt),
                                                                                visualization, h=vis_w // 2)
         epoch_iou_d['visible_2d'].append(visb_iou[0])
         epoch_iou_d['visible_3d'].append(visb_iou[1])
         epoch_iou_d['full_2d'].append(full_iou[0])
         epoch_iou_d['full_3d'].append(full_iou[1])
         epoch_iou_d['height'].append(iou_height)
+        epoch_iou_d['trivialWalls'].append(TW)
+
 
         if config.LOCAL_RANK == 0 and config.SHOW_BAR:
             bar.set_postfix(batch_loss_d)

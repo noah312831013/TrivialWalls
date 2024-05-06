@@ -92,8 +92,11 @@ def calc_accuracy(dt, gt, visualization=False, h=512):
         visb_iou_floodplans = np.array(visb_iou_floodplans).transpose(0, 3, 1, 2)  # NCHW
         full_iou_floodplans = np.array(full_iou_floodplans).transpose(0, 3, 1, 2)  # NCHW
         pano_bds = np.array(pano_bds).transpose(0, 3, 1, 2)
+
+    TW = np.array(np.abs((gt['trivialWalls'] - dt['trivialWalls']))).mean()
+
     return [visb_iou_2d, visb_iou_3d, visb_iou_floodplans],\
-           [full_iou_2d, full_iou_3d, full_iou_floodplans], iou_height, pano_bds, full_iou_2ds
+           [full_iou_2d, full_iou_3d, full_iou_floodplans], iou_height, pano_bds, full_iou_2ds, TW
 
 
 def calc_ce(dt, gt):
