@@ -139,7 +139,7 @@ class PanoDataAugmentation:
             image = np.flip(image, axis=1).copy()
             corners[..., 0] = pixel2uv(np.array([w]), w, h) - corners[..., 0]
             corners = corners[::-1]
-            TW = TW[::-1]
+            TW = np.flip(TW, axis=0).copy()
             self.parameters['FLIP'] = True
         else:
             self.parameters['FLIP'] = None
