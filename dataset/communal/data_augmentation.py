@@ -101,7 +101,7 @@ class PanoDataAugmentation:
     def need_aug(self, name):
         return name in self.aug and self.aug[name]
 
-    def execute_space_aug(self, corners, image):
+    def execute_space_aug(self, corners, image, TW):
         if image is None:
             return image
 
@@ -120,6 +120,8 @@ class PanoDataAugmentation:
             kz = np.random.uniform(1, 2)
             kz = 1 / kz if np.random.randint(2) == 0 else kz
             image, corners = pano_stretch(image, corners, kx, ky, kz)
+            TW = pano_stretch_image(np.expand_dims(TW,axis=0),kx,ky,kz)
+            TW = np.squeeze(TW, axis=0)
             self.parameters['STRETCH'] = {'kx': kx, 'ky': ky, 'kz': kz}
         else:
             self.parameters['STRETCH'] = None
@@ -128,6 +130,7 @@ class PanoDataAugmentation:
             d_pu = np.random.randint(w)
             image = np.roll(image, d_pu, axis=1)
             corners[..., 0] = (corners[..., 0] + pixel2uv(np.array([d_pu]), w, h)) % pixel2uv(np.array([w]), w, h)
+            TW = np.roll(TW, round(d_pu//(w//256)))
             self.parameters['ROTATE'] = d_pu
         else:
             self.parameters['ROTATE'] = None
@@ -136,11 +139,12 @@ class PanoDataAugmentation:
             image = np.flip(image, axis=1).copy()
             corners[..., 0] = pixel2uv(np.array([w]), w, h) - corners[..., 0]
             corners = corners[::-1]
+            TW = TW[::-1]
             self.parameters['FLIP'] = True
         else:
             self.parameters['FLIP'] = None
 
-        return corners, image
+        return corners, image, TW
 
     def execute_visual_aug(self, image):
         if self.need_aug('GAMMA'):
@@ -183,11 +187,11 @@ class PanoDataAugmentation:
 
         return image
 
-    def execute_aug(self, corners, image):
-        corners, image = self.execute_space_aug(corners, image)
+    def execute_aug(self, corners, image, TW):
+        corners, image ,TW = self.execute_space_aug(corners, image, TW)
         if image is not None:
             image = self.execute_visual_aug(image)
-        return corners, image
+        return corners, image, TW
 
 
 if __name__ == '__main__1':
