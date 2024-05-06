@@ -33,7 +33,7 @@ TRAIN:
   EPOCHS: 200
 DATA:
   DATASET: 'zind'
-  DIR: 'src/dataset/zind'
+  DIR: '/media/user/WD_BLACK/noah/zind/datasets'
   BATCH_SIZE: 6
   NUM_WORKERS: 6
   FOR_TEST_INDEX: None
