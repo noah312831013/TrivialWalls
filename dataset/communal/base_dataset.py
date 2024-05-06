@@ -45,8 +45,9 @@ class BaseDataset(torch.utils.data.Dataset):
         :return:
         """
         corners = label['corners']
+        TW = label['trivialWalls']
         if self.pano_aug is not None:
-            corners, image = self.pano_aug.execute_aug(corners, image if 'image' in self.keys else None)
+            corners, image, TW = self.pano_aug.execute_aug(corners, image, TW if 'image' in self.keys else None)
         eps = 1e-3
         corners[:, 1] = np.clip(corners[:, 1], 0.5+eps, 1-eps)
 
@@ -65,7 +66,7 @@ class BaseDataset(torch.utils.data.Dataset):
             output['depth'] = depth
 
         if 'trivialWalls' in self.keys:
-            output['trivialWalls']=label['trivialWalls']
+            output['trivialWalls']=TW
 
         if 'ratio' in self.keys:
             # Why use ratio? Because when floor_height =y_plan=1, we only need to predict ceil_height(ratio).
