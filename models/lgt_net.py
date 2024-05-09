@@ -93,6 +93,14 @@ class LGT_Net(BaseModule):
         trivialWalls = self.linear_trivialWalls_output(x)  # [b, 256(patch_num), 1(d)]
         trivialWalls = trivialWalls.view(-1, self.patch_num)  # [b, 256(patch_num & d)]
 
+        # binary tw
+        threshold = 0.5  # Define your threshold for closeness to 0 or 1
+
+        # Thresholding
+        trivialWalls[trivialWalls < threshold] = 0
+        trivialWalls[trivialWalls >= (1 - threshold)] = 1
+
+
         output = {
             'depth': depth,
             'ratio': ratio,
