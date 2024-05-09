@@ -35,7 +35,7 @@ def convert_img(value, h, need_nor=True, cmap=None):
     return grad_img
 
 
-def show_grad(depth, grad_conv, h=5, show=False):
+def show_grad(depth, grad_conv, tw, h=5, show=False):
     """
     :param h:
     :param depth: [patch_num]
@@ -51,10 +51,10 @@ def show_grad(depth, grad_conv, h=5, show=False):
     # grad_img = convert_img(grad[0], depth.shape[-1] // 4 - h * 2)
     depth_img = convert_img(depth, h, cmap=cv2.COLORMAP_PLASMA)
     angle_img = convert_img(angle[0], h, cmap='HSV')
-
+    tw_img = convert_img(tw, h)
     # vis_grad = grad[0] / grad[0].max() / 2 + 0.5
     grad_img = convert_img(grad[0], h)
-    img = np.concatenate([depth_img, angle_img, grad_img], axis=0)
+    img = np.concatenate([depth_img, angle_img, grad_img, tw_img], axis=0)
     if show:
         plt.imshow(img)
         plt.show()

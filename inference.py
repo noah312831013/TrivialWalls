@@ -213,7 +213,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
                  show=show,
                  save_path=os.path.join(args.output_dir, f"{name}_pred.png"))
     output_xyz = dt['processed_xyz'][0] if 'processed_xyz' in dt else depth2xyz(tensor2np(dt['depth'][0]))
-
+    # temporary, need to integrate to save_pred_json
     save_trivialWalls(dt,os.path.join(args.output_dir, f"{name}_tw.txt"))
 
     json_data = save_pred_json(output_xyz, tensor2np(dt['ratio'][0])[0],
