@@ -140,7 +140,7 @@ def preprocess(img_ori, q_error=0.7, refine_iter=3, vp_cache_path=None):
 
 def show_depth_normal_grad(dt):
     grad_conv = GradLoss().to(dt['depth'].device).grad_conv
-    dt_grad_img = show_grad(dt['depth'][0], grad_conv,dt['trivialWalls'], 50)
+    dt_grad_img = show_grad(dt['depth'][0], grad_conv,dt['trivialWalls'][0], 50)
     dt_grad_img = cv2.resize(dt_grad_img, (1024, 60), interpolation=cv2.INTER_NEAREST)
     return dt_grad_img
 
