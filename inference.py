@@ -21,7 +21,7 @@ from loss import GradLoss
 from postprocessing.post_process import post_process
 from preprocessing.pano_lsd_align import panoEdgeDetection, rotatePanorama
 from utils.boundary import corners2boundaries, layout2depth
-from utils.conversion import depth2xyz
+from utils.conversion import depth2xyz, xyz2pixel
 from utils.logger import get_logger
 from utils.misc import tensor2np_d, tensor2np
 from evaluation.accuracy import show_grad
@@ -169,7 +169,7 @@ def save_pred_json(xyz, ration, save_path):
 
 def save_trivialWalls(dt,save_path):
     with open(save_path,'w') as file:
-        file.write(str(dt['trivialWalls']))
+        file.write(str(dt['trivialWalls'][0]))
 
 def inference():
     if len(img_paths) == 0:
@@ -199,6 +199,19 @@ def inference_dataset(dataset):
         run_one_inference(data['image'].transpose(1, 2, 0), model, args, name=data['id'], logger=logger)
 
 
+def cal_tw(x1,x2,dt,last_wall = False):
+    if not last_wall:
+        avg_tw = np.sum(dt[x1:x2+1])/(x2-x1+1)
+    else:
+        avg_tw = np.sum(dt[:x1+1])+np.sum(dt[x2:])/(x1+1+(256-x2))
+
+    if avg_tw < 0.5:
+            return 0
+    else:
+            return 1
+
+
+
 @torch.no_grad()
 def run_one_inference(img, model, args, name, logger, show=True, show_depth=True,
                       show_floorplan=True, mesh_format='.obj', mesh_resolution=1024):
@@ -207,17 +220,45 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
     if args.post_processing != 'original':
         dt['processed_xyz'] = post_process(tensor2np(dt['depth']), type_name=args.post_processing)
 
-    visualize_2d(img, dt,
-                 show_depth=show_depth,
-                 show_floorplan=show_floorplan,
-                 show=show,
-                 save_path=os.path.join(args.output_dir, f"{name}_pred.png"))
     output_xyz = dt['processed_xyz'][0] if 'processed_xyz' in dt else depth2xyz(tensor2np(dt['depth'][0]))
-    # temporary, need to integrate to save_pred_json
-    save_trivialWalls(dt,os.path.join(args.output_dir, f"{name}_tw.txt"))
 
     json_data = save_pred_json(output_xyz, tensor2np(dt['ratio'][0])[0],
                                save_path=os.path.join(args.output_dir, f"{name}_pred.json"))
+    
+    floor_pts = []
+    for pt in json_data['layoutPoints']['points']:
+        floor_pts.append(xyz2pixel(pt,w=256,h=128))
+    floor_pts = np.round(np.array(floor_pts),axis=0)
+    min_value = np.min(floor_pts[:0])
+    loop_cnt = 0
+    while floor_pts[0,0] != min_value:
+        assert loop_cnt < 50, print('infinite looping')
+        loop_cnt+=1
+        floor_pts = np.roll(floor_pts, axis = 0)
+    
+    wall_tw = np.zeros(256)
+    for i in range(len(floor_pts)-1):
+       # occluded wall
+       if floor_pts[i,0] > floor_pts[i+1,0]:
+           continue
+       tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0])
+       wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = tw
+    last_tw = cal_tw(floor_pts[0],floor_pts[-1],dt['trivialWalls'][0],last_wall=True)
+    wall_tw[:floor_pts[0]] = last_tw
+    wall_tw[floor_pts[-1]:] = last_tw
+    dt_copy = dt.detach().cpu().numpy().copy()
+    dt_copy['trivialWalls'][0]=wall_tw
+
+    visualize_2d(img, dt_copy,
+                show_depth=show_depth,
+                show_floorplan=show_floorplan,
+                show=show,
+                save_path=os.path.join(args.output_dir, f"{name}_pred.png"))
+
+    
+    # temporary, need to integrate to save_pred_json
+    save_trivialWalls(dt,os.path.join(args.output_dir, f"{name}_tw.txt"))
+
     # if args.visualize_3d:
     #     from visualization.visualizer.visualizer import visualize_3d
     #     visualize_3d(json_data, (img * 255).astype(np.uint8))

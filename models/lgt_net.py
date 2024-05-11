@@ -98,7 +98,7 @@ class LGT_Net(BaseModule):
 
         # Thresholding
         trivialWalls[trivialWalls < threshold] = 0
-        trivialWalls[trivialWalls >= (1 - threshold)] = 1
+        trivialWalls[trivialWalls >= threshold] = 1
 
 
         output = {
