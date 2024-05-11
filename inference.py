@@ -200,6 +200,7 @@ def inference_dataset(dataset):
 
 
 def cal_tw(x1,x2,dt,last_wall = False):
+    print(f"x1: {x1},{type(x1)}, x2: {x2},{type(x2)}")
     x1 = int(x1)
     x2 = int(x2)
     if not last_wall:
