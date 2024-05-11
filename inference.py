@@ -232,6 +232,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
     for pt in json_data['layoutPoints']['points']:
         floor_pts.append(xyz2pixel(np.array(pt['xyz']),w=256,h=128))
     floor_pts = np.round(np.array(floor_pts))
+    floor_pts = floor_pts[::-1]
     min_value = np.min(floor_pts[:,0])
     loop_cnt = 0
     while floor_pts[0,0] != min_value:
@@ -246,7 +247,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
            continue
        tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = tw
-    last_tw = cal_tw(floor_pts[0],floor_pts[-1],dt['trivialWalls'][0],last_wall=True)
+    last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0],last_wall=True)
     wall_tw[:floor_pts[0]] = last_tw
     wall_tw[floor_pts[-1]:] = last_tw
     dt_copy = dt.detach().cpu().numpy().copy()
