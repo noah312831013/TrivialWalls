@@ -224,6 +224,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
         dt['processed_xyz'] = post_process(tensor2np(dt['depth']), type_name=args.post_processing)
 
     output_xyz = dt['processed_xyz'][0] if 'processed_xyz' in dt else depth2xyz(tensor2np(dt['depth'][0]))
+    print("output_xyz",output_xyz)
 
     json_data = save_pred_json(output_xyz, tensor2np(dt['ratio'][0])[0],
                                save_path=os.path.join(args.output_dir, f"{name}_pred.json"))
