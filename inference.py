@@ -250,10 +250,10 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     wall_tw[:floor_pts[0,0]] = last_tw
     wall_tw[floor_pts[-1,0]:] = last_tw
-    dt_copy = dt.detach().cpu().numpy().copy()
-    dt_copy['trivialWalls'][0]=wall_tw
 
-    visualize_2d(img, dt_copy,
+    dt['trivialWalls'][0] = wall_tw
+
+    visualize_2d(img, dt,
                 show_depth=show_depth,
                 show_floorplan=show_floorplan,
                 show=show,
