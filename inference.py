@@ -200,6 +200,8 @@ def inference_dataset(dataset):
 
 
 def cal_tw(x1,x2,dt,last_wall = False):
+    x1 = int(x1)
+    x2 = int(x2)
     if not last_wall:
         avg_tw = np.sum(dt[x1:x2+1])/(x2-x1+1)
     else:
@@ -241,7 +243,6 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
        # occluded wall
        if floor_pts[i,0] > floor_pts[i+1,0]:
            continue
-       print(f"pt: {type(floor_pts[i,0])}, {floor_pts[i,0]}, dt: {type(dt['trivialWalls'][0])}, {dt['trivialWalls'][0]}")
        tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = tw
     last_tw = cal_tw(floor_pts[0],floor_pts[-1],dt['trivialWalls'][0],last_wall=True)
