@@ -247,7 +247,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
            continue
        tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = tw
-    last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0],last_wall=True)
+    last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     wall_tw[:floor_pts[0]] = last_tw
     wall_tw[floor_pts[-1]:] = last_tw
     dt_copy = dt.detach().cpu().numpy().copy()
