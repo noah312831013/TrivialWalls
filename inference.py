@@ -242,7 +242,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
        if floor_pts[i,0] > floor_pts[i+1,0]:
            continue
        print(f"pt: {type(floor_pts[i,0])}, {floor_pts[i,0]}, dt: {type(dt['trivialWalls'][0])}, {dt['trivialWalls'][0]}")
-       tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0])
+       tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = tw
     last_tw = cal_tw(floor_pts[0],floor_pts[-1],dt['trivialWalls'][0],last_wall=True)
     wall_tw[:floor_pts[0]] = last_tw
