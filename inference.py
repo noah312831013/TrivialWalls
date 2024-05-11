@@ -238,7 +238,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
         assert loop_cnt < 50, print('infinite looping')
         loop_cnt+=1
         floor_pts = np.roll(floor_pts, shift = -1, axis = 0)
-    
+    print("floor_pts: ",floor_pts)
     wall_tw = np.zeros(256)
     for i in range(len(floor_pts)-1):
        # occluded wall
