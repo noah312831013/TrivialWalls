@@ -224,13 +224,12 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
         dt['processed_xyz'] = post_process(tensor2np(dt['depth']), type_name=args.post_processing)
 
     output_xyz = dt['processed_xyz'][0] if 'processed_xyz' in dt else depth2xyz(tensor2np(dt['depth'][0]))
-    print("output_xyz",output_xyz)
 
     json_data = save_pred_json(output_xyz, tensor2np(dt['ratio'][0])[0],
                                save_path=os.path.join(args.output_dir, f"{name}_pred.json"))
     
     floor_pts = []
-    for pt in json_data['layoutPoints']['points']:
+    for pt in output_xyz:
         floor_pts.append(xyz2pixel(np.array(pt['xyz']),w=256,h=128))
     floor_pts = np.round(np.array(floor_pts)).astype(np.int64)
     floor_pts = floor_pts[::-1]
