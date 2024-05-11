@@ -227,8 +227,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
     
     floor_pts = []
     for pt in json_data['layoutPoints']['points']:
-        print(pt)
-        floor_pts.append(xyz2pixel(np.array(list(pt)),w=256,h=128))
+        floor_pts.append(xyz2pixel(np.array(pt['xyz']),w=256,h=128))
     floor_pts = np.round(np.array(floor_pts),axis=0)
     min_value = np.min(floor_pts[:0])
     loop_cnt = 0
