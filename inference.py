@@ -250,8 +250,9 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     wall_tw[:floor_pts[0,0]] = last_tw
     wall_tw[floor_pts[-1,0]:] = last_tw
+    wall_tw_tensor = torch.from_numpy(wall_tw)
 
-    dt['trivialWalls'][0] = wall_tw
+    dt['trivialWalls'][0] = wall_tw_tensor
 
     visualize_2d(img, dt,
                 show_depth=show_depth,
