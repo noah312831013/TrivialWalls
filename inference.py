@@ -230,7 +230,7 @@ def run_one_inference(img, model, args, name, logger, show=True, show_depth=True
     
     floor_pts = []
     for pt in output_xyz:
-        floor_pts.append(xyz2pixel(np.array(pt['xyz']),w=256,h=128))
+        floor_pts.append(xyz2pixel(pt,w=256,h=128))
     floor_pts = np.round(np.array(floor_pts)).astype(np.int64)
     floor_pts = floor_pts[::-1]
     min_value = np.min(floor_pts[:,0])
