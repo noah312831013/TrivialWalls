@@ -216,7 +216,7 @@ def cal_tw(x1,x2,dt,last_wall = False):
 
 
 @torch.no_grad()
-def run_one_inference(img, model, args, name, logger, show=True, show_depth=True,
+def run_one_inference(img, model, args, name, logger, show=False, show_depth=True,
                       show_floorplan=True, mesh_format='.obj', mesh_resolution=1024):
     model.eval()
     dt = model(torch.from_numpy(img.transpose(2, 0, 1)[None]).to(args.device))
