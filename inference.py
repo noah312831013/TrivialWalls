@@ -200,7 +200,6 @@ def inference_dataset(dataset):
 
 
 def cal_tw(x1,x2,dt,last_wall = False):
-    print(f"x1: {x1},{type(x1)}, x2: {x2},{type(x2)}")
     x1 = int(x1)
     x2 = int(x2)
     if not last_wall:
@@ -239,7 +238,6 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
         assert loop_cnt < 50, print('infinite looping')
         loop_cnt+=1
         floor_pts = np.roll(floor_pts, shift = -1, axis = 0)
-    print("floor_pts: ",floor_pts)
     wall_tw = np.zeros(256)
     for i in range(len(floor_pts)-1):
        # occluded wall
