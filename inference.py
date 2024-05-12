@@ -246,19 +246,20 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
        if tw > max_tw:
            max_tw = tw
            wall_id = i
-       print(f"max_tw: {max_tw}, wall_id: {wall_id}")
+       print(f"max_tw: {max_tw}, wall_id: {wall_id}, tw: {tw}, i: {i}")
        
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     if last_tw > max_tw:
         max_tw = last_tw
         wall_id = len(floor_pts)
-        print(f"max_tw: {max_tw}, wall_id: {wall_id}")
+        print(f"the last : max_tw: {max_tw}, wall_id: {wall_id}")
 
     if max_tw != 0:
         if wall_id == len(floor_pts):
             wall_tw[:floor_pts[0,0]] = 1
             wall_tw[floor_pts[-1,0]:] = 1
         else:
+            print("flpts: ",floor_pts[wall_id,0],floor_pts[wall_id+1,0])
             wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
     wall_tw_tensor = torch.from_numpy(wall_tw)
 
