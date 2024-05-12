@@ -236,8 +236,8 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
         loop_cnt+=1
         floor_pts = np.roll(floor_pts, shift = -1, axis = 0)
     wall_tw = np.zeros(256)
-    max_tw = -1 
-    wall_id = -1
+    max_tw = 0
+    wall_id = 0
     for i in range(len(floor_pts)-1):
        # occluded wall
        if floor_pts[i,0] > floor_pts[i+1,0]:
@@ -254,12 +254,12 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
         wall_id = len(floor_pts)
         print(f"max_tw: {max_tw}, wall_id: {wall_id}")
 
-
-    if wall_id == len(floor_pts):
-        wall_tw[:floor_pts[0,0]] = 1
-        wall_tw[floor_pts[-1,0]:] = 1
-    else:
-        wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
+    if max_tw != 0:
+        if wall_id == len(floor_pts):
+            wall_tw[:floor_pts[0,0]] = 1
+            wall_tw[floor_pts[-1,0]:] = 1
+        else:
+            wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
     wall_tw_tensor = torch.from_numpy(wall_tw)
 
 
