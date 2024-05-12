@@ -251,13 +251,13 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
         max_tw = last_tw
         wall_id = len(floor_pts)
 
-    if wall_id == -1:
-        wall_tw_tensor = torch.from_numpy(wall_tw)
-    elif wall_id == len(floor_pts):
+    if wall_id == len(floor_pts):
         wall_tw[:floor_pts[0,0]] = 1
         wall_tw[floor_pts[-1,0]:] = 1
     else:
         wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
+    wall_tw_tensor = torch.from_numpy(wall_tw)
+
 
 
     dt['trivialWalls'][0] = wall_tw_tensor
