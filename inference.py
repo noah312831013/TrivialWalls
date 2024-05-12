@@ -207,10 +207,7 @@ def cal_tw(x1,x2,dt,last_wall = False):
     else:
         avg_tw = (np.sum(dt[:x1+1])+np.sum(dt[x2:]))/(x1+1+(256-x2))
 
-    if avg_tw < 0.5:
-            return 0
-    else:
-            return 1
+    return avg_tw
 
 
 
@@ -239,16 +236,29 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
         loop_cnt+=1
         floor_pts = np.roll(floor_pts, shift = -1, axis = 0)
     wall_tw = np.zeros(256)
+    max_tw = -1 
+    wall_id = -1
     for i in range(len(floor_pts)-1):
        # occluded wall
        if floor_pts[i,0] > floor_pts[i+1,0]:
            continue
        tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
-       wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = tw
+       if tw > max_tw:
+           max_tw = tw
+           wall_id = i
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
-    wall_tw[:floor_pts[0,0]] = last_tw
-    wall_tw[floor_pts[-1,0]:] = last_tw
-    wall_tw_tensor = torch.from_numpy(wall_tw)
+    if last_tw > max_tw:
+        max_tw = last_tw
+        wall_id = len(floor_pts)
+
+    if wall_id == -1:
+        wall_tw_tensor = torch.from_numpy(wall_tw)
+    elif wall_id == len(floor_pts):
+        wall_tw[:floor_pts[0,0]] = 1
+        wall_tw[floor_pts[-1,0]:] = 1
+    else:
+        wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
+
 
     dt['trivialWalls'][0] = wall_tw_tensor
 
