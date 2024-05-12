@@ -242,14 +242,18 @@ def run_one_inference(img, model, args, name, logger, show=False, show_depth=Tru
        # occluded wall
        if floor_pts[i,0] > floor_pts[i+1,0]:
            continue
-       tw =  cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
+       tw = cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        if tw > max_tw:
            max_tw = tw
            wall_id = i
+       print(f"max_tw: {max_tw}, wall_id: {wall_id}")
+       
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     if last_tw > max_tw:
         max_tw = last_tw
         wall_id = len(floor_pts)
+        print(f"max_tw: {max_tw}, wall_id: {wall_id}")
+
 
     if wall_id == len(floor_pts):
         wall_tw[:floor_pts[0,0]] = 1
