@@ -293,8 +293,8 @@ if __name__ == '__main__':
 
     model, _, _, _ = build_model(config, logger)
     os.makedirs(args.output_dir, exist_ok=True)
-    img_paths = sorted(glob.glob(args.img_glob))
-
+    img_paths = sorted(glob.glob(args.img_glob+'/*.jpg'))
+    
     inference()
 
     # dataset = MP3DDataset(root_dir='./src/dataset/mp3d', mode='test', split_list=[
