@@ -79,6 +79,7 @@ class BaseDataset(torch.utils.data.Dataset):
 
             output['depth_img'] = depth_img.transpose(2, 0, 1)
             # 產生normal_img
+            depth = torch.tensor(depth)
             xz = depth2xyz(depth)[:,::2]
             direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
             direction = direction / direction.norm(p=2, dim=-1)[..., None]
