@@ -180,7 +180,7 @@ class LGT_Net(BaseModule):
 
         # feature extractor
         x = self.feature_extractor(x)  # [b 1024(d) 256(w)]
-        depth = self.feature_extractor(depth) # [b 1024(d) 256(w)]
+        depth = self.feature_extractor_depth(depth) # [b 1024(d) 256(w)]
         normal = self.feature_extractor(normal) # [b 1024(d) 256(w)]
 
         x = self.scalar_x * x + self.scalar_depth * depth + self.scalar_normal * normal
