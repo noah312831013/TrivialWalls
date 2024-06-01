@@ -74,6 +74,7 @@ class BaseDataset(torch.utils.data.Dataset):
             # 產生depth_img
             depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
             depth_img = np.repeat(depth,patch_num//2,axis=0) # [patch_num//2, patch_num]
+            print(depth_img.shape)
             depth_img = draw_walls(depth_img,uv_cor)
 
             output['depth_img'] = depth_img.transpose(2, 0, 1)
