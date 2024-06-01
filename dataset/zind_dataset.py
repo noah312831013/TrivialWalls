@@ -87,16 +87,19 @@ class ZindDataset(BaseDataset):
         pano = self.data[idx]
         rgb_path = pano['img_path']
         label = pano
-        image = read_image(rgb_path, self.shape)
+        image = read_image(rgb_path, self.shape) # (512, 1024, 3)
 
         if self.vp_align:
             #  Equivalent to vanishing point alignment step
             rotation = calc_rotation(corners=label['corners'])
             shift = math.modf(rotation / (2 * np.pi) + 1)[0]
             image = np.roll(image, round(shift * self.shape[1]), axis=1)
-            print(f'rotation shift:{shift}')
             label['trivialWalls'] = np.roll(label['trivialWalls'], round(shift * 256))
             label['corners'][:, 0] = np.modf(label['corners'][:, 0] + shift)[0]
+            # cei
+            label['uv_corners_list'][0][:, 0] = label['corners'][:, 0]
+            # flo
+            label['uv_corners_list'][1] = label['corners']
 
         output = self.process_data(label, image, self.patch_num)
         return output

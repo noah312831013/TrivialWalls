@@ -79,7 +79,7 @@ def pano_stretch_conner(corners, kx, ky, kz):
     return new_corners
 
 
-def pano_stretch(pano_img, corners, kx, ky, kz):
+def pano_stretch(pano_img, corners, cor_list, kx, ky, kz):
     """
     :param pano_img: a panorama image, shape must be [h,w,c]
     :param corners:
@@ -90,7 +90,12 @@ def pano_stretch(pano_img, corners, kx, ky, kz):
     """
     new_img = pano_stretch_image(pano_img, kx, ky, kz)
     new_corners = pano_stretch_conner(corners, kx, ky, kz)
-    return new_img, new_corners
+    new_corners_list = []
+    new_corners_list.append(pano_stretch_conner(cor_list[0], kx, ky, kz))
+    new_corners_list.append(new_corners)
+
+
+    return new_img, new_corners, new_corners_list
 
 
 class PanoDataAugmentation:
@@ -101,7 +106,7 @@ class PanoDataAugmentation:
     def need_aug(self, name):
         return name in self.aug and self.aug[name]
 
-    def execute_space_aug(self, corners, image, TW):
+    def execute_space_aug(self, corners, cor_list, image, TW):
         if image is None:
             return image
 
@@ -119,7 +124,7 @@ class PanoDataAugmentation:
             ky = 1
             kz = np.random.uniform(1, 2)
             kz = 1 / kz if np.random.randint(2) == 0 else kz
-            image, corners = pano_stretch(image, corners, kx, ky, kz)
+            image, corners, cor_list = pano_stretch(image, corners, cor_list, kx, ky, kz)
             TW = pano_stretch_image(np.expand_dims(TW,axis=0),kx,ky,kz)
             TW = np.squeeze(TW, axis=0)
             self.parameters['STRETCH'] = {'kx': kx, 'ky': ky, 'kz': kz}
@@ -130,6 +135,8 @@ class PanoDataAugmentation:
             d_pu = np.random.randint(w)
             image = np.roll(image, d_pu, axis=1)
             corners[..., 0] = (corners[..., 0] + pixel2uv(np.array([d_pu]), w, h)) % pixel2uv(np.array([w]), w, h)
+            cor_list[0][:, 0] = corners[..., 0]
+            cor_list[1][:, 0] = corners[..., 0]
             TW = np.roll(TW, round(d_pu//(w//256)))
             self.parameters['ROTATE'] = d_pu
         else:
@@ -139,12 +146,16 @@ class PanoDataAugmentation:
             image = np.flip(image, axis=1).copy()
             corners[..., 0] = pixel2uv(np.array([w]), w, h) - corners[..., 0]
             corners = corners[::-1]
+            cor_list[0][:, 0] = corners[..., 0]
+            cor_list[1][:, 0] = corners[..., 0]
+            cor_list[0] = cor_list[0][::-1]
+            cor_list[1] = cor_list[1][::-1]
             TW = np.flip(TW, axis=0).copy()
             self.parameters['FLIP'] = True
         else:
             self.parameters['FLIP'] = None
 
-        return corners, image, TW
+        return corners, image, TW, cor_list
 
     def execute_visual_aug(self, image):
         if self.need_aug('GAMMA'):
@@ -187,11 +198,11 @@ class PanoDataAugmentation:
 
         return image
 
-    def execute_aug(self, corners, image, TW):
-        corners, image ,TW = self.execute_space_aug(corners, image, TW)
+    def execute_aug(self, corners, cor_list, image, TW):
+        corners, image ,TW, cor_list = self.execute_space_aug(corners, cor_list, image, TW)
         if image is not None:
             image = self.execute_visual_aug(image)
-        return corners, image, TW
+        return corners, image, TW, cor_list
 
 
 if __name__ == '__main__1':

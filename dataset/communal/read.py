@@ -131,7 +131,7 @@ def read_zind(partition_path, simplicity_path, data_dir, mode, is_simple=True,
                 continue
 
             layout = pano[layout_type]
-            # corners
+            # corners 地板 uv
             corner_xz = np.array(layout['vertices'])
             corner_xz[..., 0] = -corner_xz[..., 0]
             corner_xyz = np.insert(corner_xz, 1, pano['camera_height'], axis=1)
@@ -139,6 +139,13 @@ def read_zind(partition_path, simplicity_path, data_dir, mode, is_simple=True,
 
             # ratio
             ratio = np.array([(pano['ceiling_height'] - pano['camera_height']) / pano['camera_height']], dtype=np.float32)
+
+            # 存天花板以及地板的uv corners
+            uv_corners_list = []
+            flo = corner_xyz*[1,-1*ratio.item(),1]
+            uv_flo = xyz2uv(flo).astype(np.float32)
+            uv_corners_list.append(corners)
+            uv_corners_list.append(uv_flo)
 
             # trivialWalls: based on verticies
             if 'trivial_wall' in pano:
@@ -216,6 +223,7 @@ def read_zind(partition_path, simplicity_path, data_dir, mode, is_simple=True,
                 'objects': objects,
                 'ratio': ratio,
                 'id': f'{house_index}_{pano_index}',
-                'is_inside': pano['is_inside']
+                'is_inside': pano['is_inside'],
+                'uv_corners_list': uv_corners_list
             })
     return pano_list

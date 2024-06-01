@@ -203,19 +203,22 @@ def train_an_epoch(model, train_data_loader, optimizer, criterion, config, logge
     epoch_loss_d = {}
     for i, gt in bar:
         imgs = gt['image'].to(device, non_blocking=True)
-        gt['depth'] = gt['depth'].to(device, non_blocking=True)
-        gt['ratio'] = gt['ratio'].to(device, non_blocking=True)
+        depth_img = gt['depth_img'].to(device, non_blocking=True) # [c == 1]
+        normal_img = gt['normal_img'].to(device, non_blocking=True) # [c == 3]
+
+        # gt['depth'] = gt['depth'].to(device, non_blocking=True)
+        # gt['ratio'] = gt['ratio'].to(device, non_blocking=True)
         gt['trivialWalls'] = gt['trivialWalls'].to(device, non_blocking=True)
 
         if 'corner_heat_map' in gt:
             gt['corner_heat_map'] = gt['corner_heat_map'].to(device, non_blocking=True)
         if config.AMP_OPT_LEVEL != "O0" and 'cuda' in device:
             imgs = imgs.type(torch.float16)
-            gt['depth'] = gt['depth'].type(torch.float16)
-            gt['ratio'] = gt['ratio'].type(torch.float16)
+            # gt['depth'] = gt['depth'].type(torch.float16)
+            # gt['ratio'] = gt['ratio'].type(torch.float16)
             gt['trivialWalls'] = gt['trivialWalls'].type(torch.float16)
 
-        dt = model(imgs)
+        dt = model(imgs, depth_img, normal_img)
         loss, batch_loss_d, epoch_loss_d = calc_criterion(criterion, gt, dt, epoch_loss_d)
         if config.LOCAL_RANK == 0 and config.SHOW_BAR:
             bar.set_postfix(batch_loss_d)
@@ -281,38 +284,41 @@ def val_an_epoch(model, val_data_loader, criterion, config, logger, writer, epoc
         gt['depth'] = gt['depth'].to(device, non_blocking=True)
         gt['ratio'] = gt['ratio'].to(device, non_blocking=True)
         gt['trivialWalls'] = gt['trivialWalls'].to(device, non_blocking=True)
+        depth_img = gt['depth_img'].to(device, non_blocking=True)
+        normal_img = gt['normal_img'].to(device, non_blocking=True)
+
 
         if 'corner_heat_map' in gt:
             gt['corner_heat_map'] = gt['corner_heat_map'].to(device, non_blocking=True)
-        dt = model(imgs)
+        dt = model(imgs ,depth_img, normal_img)
 
         vis_w = config.TRAIN.VIS_WEIGHT
         visualization = False  # (config.LOCAL_RANK == 0 and i == show_index) or config.SAVE_EVAL
 
         loss, batch_loss_d, epoch_loss_d = calc_criterion(criterion, gt, dt, epoch_loss_d)
 
-        if config.EVAL.POST_PROCESSING is not None:
-            depth = tensor2np(dt['depth'])
-            dt['processed_xyz'] = post_process(depth, type_name=config.EVAL.POST_PROCESSING,
-                                               need_cube=config.EVAL.FORCE_CUBE)
+        # if config.EVAL.POST_PROCESSING is not None:
+        #     depth = tensor2np(dt['depth'])
+        #     dt['processed_xyz'] = post_process(depth, type_name=config.EVAL.POST_PROCESSING,
+        #                                        need_cube=config.EVAL.FORCE_CUBE)
 
-            if config.EVAL.FORCE_CUBE and config.EVAL.NEED_CPE:
-                ce = calc_ce(tensor2np_d(dt), tensor2np_d(gt))
-                pe = calc_pe(tensor2np_d(dt), tensor2np_d(gt))
+        #     if config.EVAL.FORCE_CUBE and config.EVAL.NEED_CPE:
+        #         ce = calc_ce(tensor2np_d(dt), tensor2np_d(gt))
+        #         pe = calc_pe(tensor2np_d(dt), tensor2np_d(gt))
 
-                epoch_other_d['ce'].append(ce)
-                epoch_other_d['pe'].append(pe)
+        #         epoch_other_d['ce'].append(ce)
+        #         epoch_other_d['pe'].append(pe)
 
-            if config.EVAL.NEED_F1:
-                f1, precision, recall = calc_f1_score(tensor2np_d(dt), tensor2np_d(gt))
-                epoch_other_d['f1'].append(f1)
-                epoch_other_d['precision'].append(precision)
-                epoch_other_d['recall'].append(recall)
+        #     if config.EVAL.NEED_F1:
+        #         f1, precision, recall = calc_f1_score(tensor2np_d(dt), tensor2np_d(gt))
+        #         epoch_other_d['f1'].append(f1)
+        #         epoch_other_d['precision'].append(precision)
+        #         epoch_other_d['recall'].append(recall)
 
-        if config.EVAL.NEED_RMSE:
-            rmse, delta_1 = calc_rmse_delta_1(tensor2np_d(dt), tensor2np_d(gt))
-            epoch_other_d['rmse'].append(rmse)
-            epoch_other_d['delta_1'].append(delta_1)
+        # if config.EVAL.NEED_RMSE:
+        #     rmse, delta_1 = calc_rmse_delta_1(tensor2np_d(dt), tensor2np_d(gt))
+        #     epoch_other_d['rmse'].append(rmse)
+        #     epoch_other_d['delta_1'].append(delta_1)
 
         visb_iou, full_iou, iou_height, pano_bds, full_iou_2ds ,TW = calc_accuracy(tensor2np_d(dt), tensor2np_d(gt),
                                                                                visualization, h=vis_w // 2)

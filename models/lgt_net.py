@@ -25,6 +25,11 @@ class LGT_Net(BaseModule):
         self.corner_heat_map = corner_heat_map
         self.dropout_d = dropout
 
+        self.scalar_x = nn.Parameter(torch.tensor(0.6))
+        self.scalar_depth = nn.Parameter(torch.tensor(0.2))
+        self.scalar_normal = nn.Parameter(torch.tensor(0.2))
+
+
         if backbone == 'patch':
             self.feature_extractor = PatchFeatureExtractor(patch_num=self.patch_num, input_shape=[3, 512, 1024])
         else:
@@ -57,9 +62,9 @@ class LGT_Net(BaseModule):
 
         if self.output_name == 'LGT':
             # omnidirectional-geometry aware output
-            self.linear_depth_output = nn.Linear(in_features=self.patch_dim, out_features=1)
-            self.linear_ratio = nn.Linear(in_features=self.patch_dim, out_features=1)
-            self.linear_ratio_output = nn.Linear(in_features=self.patch_num, out_features=1)
+            # self.linear_depth_output = nn.Linear(in_features=self.patch_dim, out_features=1)
+            # self.linear_ratio = nn.Linear(in_features=self.patch_dim, out_features=1)
+            # self.linear_ratio_output = nn.Linear(in_features=self.patch_num, out_features=1)
             self.linear_trivialWalls_output = nn.Linear(in_features=self.patch_dim, out_features=1)
 
         elif self.output_name == 'LED' or self.output_name == 'Horizon':
@@ -82,28 +87,28 @@ class LGT_Net(BaseModule):
             'ratio': [b, 1(d)]
         }
         """
-        depth = self.linear_depth_output(x)  # [b, 256(patch_num), 1(d)]
-        depth = depth.view(-1, self.patch_num)  # [b, 256(patch_num & d)]
+        # depth = self.linear_depth_output(x)  # [b, 256(patch_num), 1(d)]
+        # depth = depth.view(-1, self.patch_num)  # [b, 256(patch_num & d)]
 
         # ratio represent room height
-        ratio = self.linear_ratio(x)  # [b, 256(patch_num), 1(d)]
-        ratio = ratio.view(-1, self.patch_num)  # [b, 256(patch_num & d)]
-        ratio = self.linear_ratio_output(ratio)  # [b, 1(d)]
+        # ratio = self.linear_ratio(x)  # [b, 256(patch_num), 1(d)]
+        # ratio = ratio.view(-1, self.patch_num)  # [b, 256(patch_num & d)]
+        # ratio = self.linear_ratio_output(ratio)  # [b, 1(d)]
 
         trivialWalls = self.linear_trivialWalls_output(x)  # [b, 256(patch_num), 1(d)]
         trivialWalls = trivialWalls.view(-1, self.patch_num)  # [b, 256(patch_num & d)]
 
         # binary tw
-        threshold = 0.5  # Define your threshold for closeness to 0 or 1
+        #threshold = 0.5  # Define your threshold for closeness to 0 or 1
 
         # Thresholding
-        trivialWalls[trivialWalls < threshold] = 0
-        trivialWalls[trivialWalls >= threshold] = 1
+        # trivialWalls[trivialWalls < threshold] = 0
+        # trivialWalls[trivialWalls >= threshold] = 1
 
 
         output = {
-            'depth': depth,
-            'ratio': ratio,
+            # 'depth': depth,
+            # 'ratio': ratio,
             'trivialWalls': trivialWalls
         }
         return output
@@ -161,9 +166,10 @@ class LGT_Net(BaseModule):
                                                tensor2np(lonlat2uv(floor_lonlat))], mode='mean').reshape(-1, 1)
         return output
 
-    def forward(self, x):
+    def forward(self, x, depth, normal):
         """
         :param x: [b, 3(d), 512(h), 1024(w)]
+        :param depth and normal are [b, 1, 512, 1024], [b, 3, 512, 1024]
         :return: {
             'depth': [b, 256(patch_num & d)]
             'ratio': [b, 1(d)]
@@ -172,6 +178,10 @@ class LGT_Net(BaseModule):
 
         # feature extractor
         x = self.feature_extractor(x)  # [b 1024(d) 256(w)]
+        depth = self.feature_extractor(depth) # [b 1024(d) 256(w)]
+        normal = self.feature_extractor(normal) # [b 1024(d) 256(w)]
+
+        x = self.scalar_x * x + self.scalar_depth * depth + self.scalar_normal * normal
 
         if 'Transformer' in self.decoder_name:
             # transformer decoder

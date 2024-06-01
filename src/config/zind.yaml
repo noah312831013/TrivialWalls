@@ -16,15 +16,15 @@ TRAIN:
   SCRATCH: False
   DETERMINISTIC: True
   CRITERION:
-    DEPTH:
-      WEIGHT: 0.9
-    RATIO:
-      WEIGHT: 0.1
+    # DEPTH:
+    #   WEIGHT: 0.9
+    # RATIO:
+    #   WEIGHT: 0.1
     TRIVIALWALLS:
-      WEIGHT: 0.1
-    GRAD:
-      WEIGHT: 0.1
-      WEIGHTS: [ 1.0, 1.0 ]
+      WEIGHT: 1.0
+    # GRAD:
+    #   WEIGHT: 0.1
+    #   WEIGHTS: [ 1.0, 1.0 ]
   BASE_LR:
     1e-4
   RESUME_LAST: False

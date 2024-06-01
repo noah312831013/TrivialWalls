@@ -203,19 +203,19 @@ def uv2pixel(uv, w=1024, h=512, axis=None, need_round=True):
     elif axis == 0:
         pu = uv * w - 0.5
         if need_round:
-            pu = pu.round().astype(np.int) if isinstance(uv, np.ndarray) else pu.round().int()
+            pu = pu.round().astype(int) if isinstance(uv, np.ndarray) else pu.round().int()
         return pu
     elif axis == 1:
         pv = uv * h - 0.5
         if need_round:
-            pv = pv.round().astype(np.int) if isinstance(uv, np.ndarray) else pv.round().int()
+            pv = pv.round().astype(int) if isinstance(uv, np.ndarray) else pv.round().int()
         return pv
     else:
         assert False, "axis error"
 
     lst = [pu, pv]
     if need_round:
-        pixel = np.concatenate(lst, axis=-1).round().astype(np.int) if isinstance(uv, np.ndarray) else torch.cat(lst,
+        pixel = np.concatenate(lst, axis=-1).round().astype(int) if isinstance(uv, np.ndarray) else torch.cat(lst,
                                                                                                                  dim=-1).round().int()
     else:
         pixel = np.concatenate(lst, axis=-1) if isinstance(uv, np.ndarray) else torch.cat(lst, dim=-1)

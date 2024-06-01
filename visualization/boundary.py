@@ -11,6 +11,29 @@ from utils.boundary import corners2boundary, corners2boundaries, find_peaks, con
     visibility_corners
 
 
+# corners: [uv_cor_ceil, uv_cor_flor]
+def draw_walls(pano_img, corners:list, ch_num=3,show=False):
+    w = pano_img.shape[1]
+    h = pano_img.shape[0]
+    bon_pix_cei = uv2pixel(corners2boundary(corners[0],length=w),w=w,h=h)
+    bon_pix_flo = uv2pixel(corners2boundary(corners[1], length=w),w=w,h=h)
+    poly_pts = np.concatenate([bon_pix_cei,bon_pix_flo[::-1]])
+    mask = np.zeros((h,w,1),dtype=np.uint8)
+    if ch_num == 3:
+        cv2.fillPoly(mask, [poly_pts], color=(1, 1, 1))
+    elif ch_num == 1:
+        cv2.fillPoly(mask, [poly_pts], color=(1))
+
+    pano_img = pano_img * mask
+
+    if show:
+        plt.imshow(pano_img)
+        plt.axis('off')
+        plt.show()
+
+    return pano_img
+
+
 def draw_boundary(pano_img, corners: np.ndarray = None, boundary: np.ndarray = None, draw_corners=True, show=False,
                   step=0.01, length=None, boundary_color=None, marker_color=None, title=None, visible=True):
     if marker_color is None:
