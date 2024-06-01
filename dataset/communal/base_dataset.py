@@ -68,20 +68,21 @@ class BaseDataset(torch.utils.data.Dataset):
             visible_corners = visibility_corners(corners)
 
         if 'depth' in self.keys:
-            depth = self.get_depth(visible_corners, length=patch_num, visible=False)
+            depth = self.get_depth(visible_corners, length=patch_num, visible=False) # [patch_num,]
             assert len(depth) == patch_num, f"{label['id']}, {len(depth)}, {self.pano_aug.parameters}, {corners}"
             output['depth'] = depth
             # 產生depth_img
-            depth_img = np.expand_dims(depth,axis=0)
-            depth_img = np.repeat(depth,image.shape[1],axis=0)
+            depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
+            depth_img = np.repeat(depth,patch_num//2,axis=0) # [patch_num//2, patch_num]
             depth_img = draw_walls(depth_img,uv_cor)
+
             output['depth_img'] = depth_img.transpose(2, 0, 1)
             # 產生normal_img
             xz = depth2xyz(depth)[:,::2]
             direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
             direction = direction / direction.norm(p=2, dim=-1)[..., None]
             angle = torch.atan2(direction[..., 1], direction[..., 0])
-            normal_img = convert_img(angle, image.shape[1], cmap='HSV')
+            normal_img = convert_img(angle, patch_num//2, cmap='HSV')
             normal_img = draw_walls(normal_img,uv_cor)
             output['normal_img'] = normal_img.transpose(2, 0, 1)
 
