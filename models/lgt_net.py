@@ -32,6 +32,8 @@ class LGT_Net(BaseModule):
 
         if backbone == 'patch':
             self.feature_extractor = PatchFeatureExtractor(patch_num=self.patch_num, input_shape=[3, 512, 1024])
+            self.feature_extractor_depth = PatchFeatureExtractor(patch_num=self.patch_num, input_shape=[1, 512, 1024])
+
         else:
             # feature extractor
             self.feature_extractor = HorizonNetFeatureExtractor(backbone)
