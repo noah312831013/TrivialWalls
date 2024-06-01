@@ -69,14 +69,11 @@ class BaseDataset(torch.utils.data.Dataset):
 
         if 'depth' in self.keys:
             depth = self.get_depth(visible_corners, length=patch_num, visible=False) # [patch_num,]
-            print(f"depth--------------------{depth.shape}")
             assert len(depth) == patch_num, f"{label['id']}, {len(depth)}, {self.pano_aug.parameters}, {corners}"
             output['depth'] = depth
             # 產生depth_img
             depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
-            print(f"depth_img_1--------------------{depth_img.shape}")
-            depth_img = np.repeat(depth,patch_num//2,axis=0) # [patch_num//2, patch_num]
-            print(f"depth_img_2--------------------{depth_img.shape}")
+            depth_img = np.repeat(depth_img,patch_num//2,axis=0) # [patch_num//2, patch_num]
             depth_img = draw_walls(depth_img,uv_cor)
 
             output['depth_img'] = depth_img.transpose(2, 0, 1)
