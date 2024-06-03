@@ -142,10 +142,10 @@ def read_zind(partition_path, simplicity_path, data_dir, mode, is_simple=True,
 
             # 存天花板以及地板的uv corners
             uv_corners_list = []
-            flo = corner_xyz*[1,-1*ratio.item(),1]
-            uv_flo = xyz2uv(flo).astype(np.float32)
+            ceil = corner_xyz*[1,-1*ratio.item(),1]
+            uv_ceil = xyz2uv(ceil).astype(np.float32)
+            uv_corners_list.append(uv_ceil)
             uv_corners_list.append(corners)
-            uv_corners_list.append(uv_flo)
 
             # trivialWalls: based on verticies
             if 'trivial_wall' in pano:
