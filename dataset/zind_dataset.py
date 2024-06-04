@@ -11,7 +11,7 @@ from dataset.communal.read import read_image, read_label, read_zind
 from dataset.communal.base_dataset import BaseDataset
 from utils.logger import get_logger
 from preprocessing.filter import filter_center, filter_boundary, filter_self_intersection
-from utils.boundary import calc_rotation
+from utils.boundary import calc_rotation, boundary_type
 
 
 class ZindDataset(BaseDataset):
@@ -28,6 +28,9 @@ class ZindDataset(BaseDataset):
 
         data_dir = os.path.join(root_dir)
         img_dir = os.path.join(root_dir, 'image')
+        
+        # 保存那些boundary_type error
+        error = []
 
         pano_list = read_zind(partition_path=os.path.join(data_dir, f"zind_partition.json"),
                               simplicity_path=os.path.join(data_dir, f"room_shape_simplicity_labels.json"),
@@ -66,6 +69,7 @@ class ZindDataset(BaseDataset):
             if not filter_self_intersection(pano['corners']):
                 logger.warning(f"{pano['id']} self_intersection")
                 invalid_num += 1
+                error.append(pano['img_path']+'/'+pano['id'])
                 continue
 
             if 'trivialWalls' not in pano:
@@ -78,10 +82,19 @@ class ZindDataset(BaseDataset):
                 invalid_num += 1
                 continue
 
+            
+            if boundary_type(pano['uv_corners_list'][0]) is None or boundary_type(pano['uv_corners_list'][1]) is None:
+                invalid_num +=1
+                logger.warning(f"{pano['id']} boundary error!!")
+                continue
+
             self.data.append(pano)
 
+        with open('./error.txt','w') as file:
+            for pano in error:
+                file.write(pano+'\n')
         logger.info(
-            f"Build dataset mode: {self.mode} max_wall_num: {self.max_wall_num} valid: {len(self.data)} invalid: {invalid_num}")
+            f"Build dataset mode: {self.mode} max_wall_num: {self.max_wall_num} valid: {len(self.data)} invalid: {invalid_num} error: {len(error)}")
 
     def __getitem__(self, idx):
         pano = self.data[idx]
