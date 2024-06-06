@@ -57,6 +57,8 @@ class BaseDataset(torch.utils.data.Dataset):
             corners, image, TW, uv_cor = self.pano_aug.execute_aug(corners, uv_cor, image, TW if 'image' in self.keys else None)
         eps = 1e-3
         corners[:, 1] = np.clip(corners[:, 1], 0.5+eps, 1-eps)
+        uv_cor[0][:, 1] = np.clip(uv_cor[0][:, 1], 0.5+eps, 1-eps)
+        uv_cor[1][:, 1] = np.clip(uv_cor[1][:, 1], 0.5+eps, 1-eps)
 
         output = {}
         if 'image' in self.keys:
