@@ -110,7 +110,7 @@ class ZindDataset(BaseDataset):
         visible_corners = visibility_corners(label['corners'])
         depth = self.get_depth(visible_corners, length=image.shape[1], visible=False) 
         depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
-        depth_img = np.repeat(depth_img,image.shape[1],axis=0) # [patch_num//2, patch_num]
+        depth_img = np.repeat(depth_img,image.shape[0],axis=0) # [patch_num//2, patch_num]
         depth_img = np.expand_dims(depth_img,axis=-1)
         depth_img = np.repeat(depth_img,3,axis=-1)
         depth_img = draw_walls(depth_img,label['uv_corners_list'],ch_num=1)
@@ -120,7 +120,7 @@ class ZindDataset(BaseDataset):
         direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
         direction = direction / direction.norm(p=2, dim=-1)[..., None]
         angle = torch.atan2(direction[..., 1], direction[..., 0])
-        normal_img = convert_img(angle, image.shape[1], cmap='HSV')
+        normal_img = convert_img(angle, image.shape[0], cmap='HSV')
         normal_img = draw_walls(normal_img,label['uv_corners_list'])
 
         if self.vp_align:
