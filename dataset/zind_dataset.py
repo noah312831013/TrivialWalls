@@ -128,6 +128,9 @@ class ZindDataset(BaseDataset):
             rotation = calc_rotation(corners=label['corners'])
             shift = math.modf(rotation / (2 * np.pi) + 1)[0]
             image = np.roll(image, round(shift * self.shape[1]), axis=1)
+            depth_img = np.roll(depth_img, round(shift * self.shape[1]), axis=1)
+            normal_img = np.roll(normal_img, round(shift * self.shape[1]), axis=1)
+
             label['trivialWalls'] = np.roll(label['trivialWalls'], round(shift * 256))
             label['corners'][:, 0] = np.modf(label['corners'][:, 0] + shift)[0]
             # # cei
