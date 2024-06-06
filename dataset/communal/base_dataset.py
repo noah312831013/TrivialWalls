@@ -61,8 +61,8 @@ class BaseDataset(torch.utils.data.Dataset):
         output = {}
         if 'image' in self.keys:
             image = image.transpose(2, 0, 1)
-            depth_image = depth_image.transpose(2, 0, 1)
-            normal_image = normal_image.transpose(2, 0, 1)
+            depth_img = depth_img.transpose(2, 0, 1)
+            normal_img = normal_img.transpose(2, 0, 1)
 
             output['image'] = image
             output['depth_image'] = depth_image
