@@ -6,12 +6,17 @@ import os
 import json
 import math
 import numpy as np
-
+import torch
 from dataset.communal.read import read_image, read_label, read_zind
 from dataset.communal.base_dataset import BaseDataset
 from utils.logger import get_logger
 from preprocessing.filter import filter_center, filter_boundary, filter_self_intersection
-from utils.boundary import calc_rotation, boundary_type
+from utils.boundary import calc_rotation, boundary_type, visibility_corners
+from visualization.boundary import draw_walls
+from utils.conversion import uv2xyz, depth2xyz
+from visualization.grad import convert_img
+
+
 
 
 class ZindDataset(BaseDataset):
@@ -102,6 +107,22 @@ class ZindDataset(BaseDataset):
         label = pano
         image = read_image(rgb_path, self.shape) # (512, 1024, 3)
 
+        visible_corners = visibility_corners(label['corners'])
+        depth = self.get_depth(visible_corners, length=image.shape[1], visible=False) 
+        depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
+        depth_img = np.repeat(depth_img,image.shape[1],axis=0) # [patch_num//2, patch_num]
+        depth_img = np.expand_dims(depth_img,axis=-1)
+        depth_img = np.repeat(depth_img,3,axis=-1)
+        depth_img = draw_walls(depth_img,label['uv_corners_list'],ch_num=1)
+
+        depth = torch.tensor(depth)
+        xz = depth2xyz(depth)[:,::2]
+        direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
+        direction = direction / direction.norm(p=2, dim=-1)[..., None]
+        angle = torch.atan2(direction[..., 1], direction[..., 0])
+        normal_img = convert_img(angle, image.shape[1], cmap='HSV')
+        normal_img = draw_walls(normal_img,label['uv_corners_list'])
+
         if self.vp_align:
             #  Equivalent to vanishing point alignment step
             rotation = calc_rotation(corners=label['corners'])
@@ -109,12 +130,12 @@ class ZindDataset(BaseDataset):
             image = np.roll(image, round(shift * self.shape[1]), axis=1)
             label['trivialWalls'] = np.roll(label['trivialWalls'], round(shift * 256))
             label['corners'][:, 0] = np.modf(label['corners'][:, 0] + shift)[0]
-            # cei
-            label['uv_corners_list'][0][:, 0] = label['corners'][:, 0]
-            # flo
-            label['uv_corners_list'][1] = label['corners']
+            # # cei
+            # label['uv_corners_list'][0][:, 0] = label['corners'][:, 0]
+            # # flo
+            # label['uv_corners_list'][1] = label['corners']
 
-        output = self.process_data(label, image, self.patch_num)
+        output = self.process_data(label, image, depth_img, normal_img, self.patch_num)
         return output
 
 

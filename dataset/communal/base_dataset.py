@@ -39,7 +39,7 @@ class BaseDataset(torch.utils.data.Dataset):
         visible_depth = xyz2depth(uv2xyz(visible_floor_boundary, plan_y), plan_y)
         return visible_depth
     
-    def process_data(self, label, image, patch_num):
+    def process_data(self, label, image, depth_img, normal_img, patch_num):
         """
         :param label:
         :param image:
@@ -50,18 +50,23 @@ class BaseDataset(torch.utils.data.Dataset):
         TW = label['trivialWalls']
         
         # 遮罩 pano image 
-        uv_cor = label['uv_corners_list']
+        #uv_cor = label['uv_corners_list']
         # image = draw_walls(image,uv_cor)
 
         if self.pano_aug is not None:
-            corners, image, TW, uv_cor = self.pano_aug.execute_aug(corners, uv_cor, image, TW if 'image' in self.keys else None)
+            corners, image, depth_img, normal_img, TW = self.pano_aug.execute_aug(corners, image, depth_img, normal_img, TW if 'image' in self.keys else None)
         eps = 1e-3
         corners[:, 1] = np.clip(corners[:, 1], 0.5+eps, 1-eps)
 
         output = {}
         if 'image' in self.keys:
             image = image.transpose(2, 0, 1)
+            depth_image = depth_image.transpose(2, 0, 1)
+            normal_image = normal_image.transpose(2, 0, 1)
+
             output['image'] = image
+            output['depth_image'] = depth_image
+            output['normal_image'] = normal_image
 
         visible_corners = None
         if 'corner_class' in self.keys or 'depth' in self.keys:
@@ -71,24 +76,25 @@ class BaseDataset(torch.utils.data.Dataset):
             depth = self.get_depth(visible_corners, length=patch_num, visible=False) # [patch_num,]
             assert len(depth) == patch_num, f"{label['id']}, {len(depth)}, {self.pano_aug.parameters}, {corners}"
             output['depth'] = depth
-            # 產生depth_img
-            depth = self.get_depth(visible_corners, length=image.shape[2], visible=False) # [patch_num,]
-            depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
-            depth_img = np.repeat(depth_img,image.shape[1],axis=0) # [patch_num//2, patch_num]
-            depth_img = np.expand_dims(depth_img,axis=-1)
-            depth_img = np.repeat(depth_img,3,axis=-1)
-            depth_img = draw_walls(depth_img,uv_cor,ch_num=1)
 
-            output['depth_img'] = depth_img.transpose(2, 0, 1)
-            # 產生normal_img
-            depth = torch.tensor(depth)
-            xz = depth2xyz(depth)[:,::2]
-            direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
-            direction = direction / direction.norm(p=2, dim=-1)[..., None]
-            angle = torch.atan2(direction[..., 1], direction[..., 0])
-            normal_img = convert_img(angle, image.shape[1], cmap='HSV')
-            normal_img = draw_walls(normal_img,uv_cor)
-            output['normal_img'] = normal_img.transpose(2, 0, 1)
+            # # 產生depth_img
+            # depth = self.get_depth(visible_corners, length=image.shape[2], visible=False) # [patch_num,]
+            # depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
+            # depth_img = np.repeat(depth_img,image.shape[1],axis=0) # [patch_num//2, patch_num]
+            # depth_img = np.expand_dims(depth_img,axis=-1)
+            # depth_img = np.repeat(depth_img,3,axis=-1)
+            # depth_img = draw_walls(depth_img,uv_cor,ch_num=1)
+            # output['depth_img'] = depth_img.transpose(2, 0, 1)
+
+            # # 產生normal_img
+            # depth = torch.tensor(depth)
+            # xz = depth2xyz(depth)[:,::2]
+            # direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
+            # direction = direction / direction.norm(p=2, dim=-1)[..., None]
+            # angle = torch.atan2(direction[..., 1], direction[..., 0])
+            # normal_img = convert_img(angle, image.shape[1], cmap='HSV')
+            # normal_img = draw_walls(normal_img,uv_cor)
+            # output['normal_img'] = normal_img.transpose(2, 0, 1)
 
         if 'trivialWalls' in self.keys:
             output['trivialWalls']=TW
