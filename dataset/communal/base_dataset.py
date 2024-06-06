@@ -66,8 +66,8 @@ class BaseDataset(torch.utils.data.Dataset):
             normal_img = normal_img.transpose(2, 0, 1)
 
             output['image'] = image
-            output['depth_image'] = depth_img
-            output['normal_image'] = normal_img
+            output['depth_img'] = depth_img
+            output['normal_img'] = normal_img
 
         visible_corners = None
         if 'corner_class' in self.keys or 'depth' in self.keys:
