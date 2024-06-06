@@ -148,8 +148,8 @@ class PanoDataAugmentation:
 
         if self.need_aug('FLIP') and np.random.randint(2) == 0:
             image = np.flip(image, axis=1).copy()
-            depth_image = np.flip(depth_image, axis=1).copy()
-            normal_image = np.flip(normal_image, axis=1).copy()
+            depth_img = np.flip(depth_img, axis=1).copy()
+            normal_img = np.flip(normal_img, axis=1).copy()
             corners[..., 0] = pixel2uv(np.array([w]), w, h) - corners[..., 0]
             corners = corners[::-1]
             # cor_list[0][:, 0] = corners[..., 0]
