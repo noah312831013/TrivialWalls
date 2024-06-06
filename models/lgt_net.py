@@ -182,7 +182,6 @@ class LGT_Net(BaseModule):
         normal = self.feature_extractor(normal.float()) # [b 1024(d) 256(w)]
 
         x = self.scalar_x * x + self.scalar_depth * depth + self.scalar_normal * normal
-        x/= x.max()
 
         if 'Transformer' in self.decoder_name:
             # transformer decoder
