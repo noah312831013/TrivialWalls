@@ -105,6 +105,7 @@ class BaseDataset(torch.utils.data.Dataset):
             assert len(label['corners']) <= 32, "len(label['corners']):"+len(label['corners'])
             output['corners'] = np.zeros((32, 2), dtype=np.float32)
             output['corners'][:len(label['corners'])] = label['corners']
+            output['cor_list'] = uv_cor
 
         if 'corner_heat_map' in self.keys:
             output['corner_heat_map'] = get_heat_map(visible_corners[..., 0])
