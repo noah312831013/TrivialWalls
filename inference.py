@@ -288,7 +288,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     min_value = np.min(floor_pts[:,0])
     loop_cnt = 0
     while floor_pts[0,0] != min_value:
-        assert loop_cnt < 50, print('infinite looping')
+        assert loop_cnt < 50, 'infinite looping'
         loop_cnt+=1
         floor_pts = np.roll(floor_pts, shift = -1, axis = 0)
     print("floor_pts: ",floor_pts,"\n")
