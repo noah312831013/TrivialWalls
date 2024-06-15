@@ -166,7 +166,7 @@ You can copy and modify the configuration in `YAML` file for other training.
 We provide an inference script (`inference.py`) that you can
 try to predict your panoramas by executing the following command (e.g., using pre-trained weights of MatterportLayout dataset):
 ```shell
-python inference.py --cfg src/config/mp3d.yaml --img_glob src/demo/demo1.png --output_dir src/output --post_processing manhattan
+python inference.py --cfg src/config/zind.yaml --img_glob demo_data/color.jpg --corners_glob demo_data/GT.txt --output_dir src/output --post_processing manhattan
 ```
 It will output json files(`xxx_pred.json`, format is the same as [PanoAnnotator](https://github.com/SunDaDenny/PanoAnnotator)) and visualization images (`xxx_pred.png`) under **output_dir**.
 visualization image:
