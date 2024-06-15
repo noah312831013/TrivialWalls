@@ -35,15 +35,10 @@ from visualization.grad import convert_img
 
 def parse_option():
     parser = argparse.ArgumentParser(description='Panorama Layout Transformer training and evaluation script')
-    parser.add_argument('--img_glob',
+    parser.add_argument('--data_glob',
                         type=str,
                         required=True,
                         help='image glob path')
-    
-    parser.add_argument('--corners_glob',
-                        type=str,
-                        required=True,
-                        help='corners glob path')
 
     parser.add_argument('--cfg',
                         type=str,
@@ -364,8 +359,8 @@ if __name__ == '__main__':
 
     model, _, _, _ = build_model(config, logger)
     os.makedirs(args.output_dir, exist_ok=True)
-    img_paths = sorted(glob.glob(args.img_glob+'/*.jpg'))
-    corners_paths = sorted(glob.glob(args.corners_glob+'/*.txt'))
+    img_paths = sorted(glob.glob(args.data_glob+'/*.jpg'))
+    corners_paths = sorted(glob.glob(args.data_glob+'/*.txt'))
     inference()
 
     # dataset = MP3DDataset(root_dir='./src/dataset/mp3d', mode='test', split_list=[
