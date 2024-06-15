@@ -309,7 +309,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     if last_tw > max_tw:
         max_tw = last_tw
         wall_id = len(floor_pts)
-        print(f"the last : max_tw: {max_tw}, wall_id: {wall_id}\n")
+        print("the last : max_tw: {}, wall_id: {}\n".format(max_tw, wall_id))
 
     if max_tw != 0:
         if wall_id == len(floor_pts):
