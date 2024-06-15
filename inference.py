@@ -303,7 +303,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
        if tw > max_tw:
            max_tw = tw
            wall_id = i
-       print(f"max_tw: {max_tw}, wall_id: {wall_id}, tw: {tw}, i: {i}\n")
+    print("max_tw: {}, wall_id: {}, tw: {}, i: {}\n".format(max_tw, wall_id, tw, i))
        
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     if last_tw > max_tw:
