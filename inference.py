@@ -320,7 +320,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     dt['trivialWalls'][0] = wall_tw_tensor
     save_name = name+"_pred.png"
 
-    visualize_2d(img, dt,
+    visualize_2d(img, corners, dt,
                 show_depth=show_depth,
                 show_floorplan=show_floorplan,
                 show=show,
