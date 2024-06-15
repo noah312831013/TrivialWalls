@@ -106,7 +106,7 @@ class ZindDataset(BaseDataset):
         rgb_path = pano['img_path']
         label = pano
         image = read_image(rgb_path, self.shape) # (512, 1024, 3)
-
+        # depth map
         visible_corners = visibility_corners(label['corners'])
         depth = self.get_depth(visible_corners, length=image.shape[1], visible=False) 
         depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
@@ -114,7 +114,7 @@ class ZindDataset(BaseDataset):
         depth_img = np.expand_dims(depth_img,axis=-1)
         depth_img = np.repeat(depth_img,3,axis=-1)
         depth_img = draw_walls(depth_img,label['uv_corners_list'],ch_num=1)
-
+        # nomral map
         depth = torch.tensor(depth)
         xz = depth2xyz(depth)[:,::2]
         direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
