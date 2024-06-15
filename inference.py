@@ -329,7 +329,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
                 show_depth=show_depth,
                 show_floorplan=show_floorplan,
                 show=show,
-                save_path=os.path.join(args.output_dir, save_name)
+                save_path=os.path.join(args.output_dir, save_name))
 
     
     # temporary, need to integrate to save_pred_json
