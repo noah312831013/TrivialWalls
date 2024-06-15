@@ -188,7 +188,7 @@ def inference():
     bar = tqdm(zip(img_paths,corners_paths), ncols=100)
     for img_path, corners_path in bar:
         if not os.path.isfile(img_path) or not os.path.isfile(corners_paths):
-            logger.error(f'The {img_path} not is file')
+            logger.error('The {} not is file'.format(img_path))
             continue
         name = os.path.basename(img_path).split('.')[0]
         bar.set_description(name)
