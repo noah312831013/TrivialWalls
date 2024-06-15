@@ -183,7 +183,7 @@ def inference():
     if len(corners_paths) == 0 :
         logger.error('No corners found')
         return
-    assert len(img_paths) == len(corners_paths), print("inputs pair match error")
+    assert len(img_paths) == len(corners_paths), "inputs pair match error"
 
     bar = tqdm(zip(img_paths,corners_paths), ncols=100)
     for img_path, corners_path in bar:
