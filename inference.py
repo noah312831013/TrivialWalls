@@ -303,7 +303,10 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     table.append(last_tw)
     table = np.array(table)
-    table = table/table.max() # 0~1
+    table = np.clip(table, 0, 1)
+
+
+    #table = table/table.max() # 0~1
 
     if last_tw > max_tw:
         max_tw = last_tw
