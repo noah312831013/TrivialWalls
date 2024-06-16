@@ -310,7 +310,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
         wall_id = len(floor_pts)
 
     for i in range(len(table)):
-        if i != len(table):
+        if i != len(table)-1:
             wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
         else:
             wall_tw[:floor_pts[0,0]] = table[i]
