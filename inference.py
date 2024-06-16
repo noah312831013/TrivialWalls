@@ -231,7 +231,7 @@ def get_depth(corners, plan_y=1, length=256, visible=True):
 def get_depth_map(img,corners):
     cei = corners[len(corners)//2:]
     floor = corners[:len(corners)//2]
-    depth = get_depth(floor,length=img.shape[1],visible=False)
+    depth = get_depth(floor,length=img.shape[1],visible=True)
     depth_img = np.expand_dims(depth,axis=0) 
     depth_img = np.repeat(depth_img,img.shape[0],axis=0) 
     depth_img = np.expand_dims(depth_img,axis=-1)
@@ -245,7 +245,7 @@ def get_depth_map(img,corners):
 def get_normal_map(img, corners):
     cei = corners[len(corners)//2:]
     floor = corners[:len(corners)//2]
-    depth = torch.tensor(get_depth(floor,length=img.shape[1],visible=False))
+    depth = torch.tensor(get_depth(floor,length=img.shape[1],visible=True))
     xz = depth2xyz(depth)[:,::2]
     direction = torch.roll(xz, -1, dims=0) - xz  # direct[i] = xz[i+1] - xz[i]
     direction = direction / direction.norm(p=2, dim=-1)[..., None]

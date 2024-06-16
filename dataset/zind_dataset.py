@@ -108,7 +108,7 @@ class ZindDataset(BaseDataset):
         image = read_image(rgb_path, self.shape) # (512, 1024, 3)
         # depth map
         visible_corners = visibility_corners(label['corners'])
-        depth = self.get_depth(visible_corners, length=image.shape[1], visible=False) 
+        depth = self.get_depth(visible_corners, length=image.shape[1], visible=True) 
         depth_img = np.expand_dims(depth,axis=0) # [1, pathc_num]
         depth_img = np.repeat(depth_img,image.shape[0],axis=0) # [patch_num//2, patch_num]
         depth_img = np.expand_dims(depth_img,axis=-1)
