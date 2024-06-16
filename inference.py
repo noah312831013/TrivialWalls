@@ -216,9 +216,9 @@ def cal_tw(x1,x2,dt,last_wall = False):
     x1 = int(x1)
     x2 = int(x2)
     if not last_wall:
-        avg_tw = np.sum(dt[x1:x2+1])/(x2-x1+1)
+        avg_tw = np.sum(dt[x1:x2])/(x2-x1)
     else:
-        avg_tw = (np.sum(dt[:x1+1])+np.sum(dt[x2:]))/(x1+1+(256-x2))
+        avg_tw = (np.sum(dt[:x1])+np.sum(dt[x2:]))/(x1+(256-x2))
 
     return avg_tw
 
@@ -286,33 +286,42 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
         assert loop_cnt < 50, 'infinite looping'
         loop_cnt+=1
         floor_pts = np.roll(floor_pts, shift = -1, axis = 0)
-    print("floor_pts: ",floor_pts,"\n")
     wall_tw = np.zeros(256)
     max_tw = 0
     wall_id = 0
+    table = []
     for i in range(len(floor_pts)-1):
        # occluded wall
        if floor_pts[i,0] > floor_pts[i+1,0]:
            continue
        tw = cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
+       table.append(tw)
        if tw > max_tw:
            max_tw = tw
            wall_id = i
-    print("max_tw: {}, wall_id: {}, tw: {}, i: {}\n".format(max_tw, wall_id, tw, i))
        
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
+    table.append(last_tw)
+    table = np.array(table)
+    table = table/table.max() # 0~1
+
     if last_tw > max_tw:
         max_tw = last_tw
         wall_id = len(floor_pts)
-        print("the last : max_tw: {}, wall_id: {}\n".format(max_tw, wall_id))
 
-    if max_tw != 0:
-        if wall_id == len(floor_pts):
-            wall_tw[:floor_pts[0,0]] = 1
-            wall_tw[floor_pts[-1,0]:] = 1
+    for i in range(len(table)):
+        if i != len(table):
+            wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
         else:
-            print("flpts: ",floor_pts[wall_id,0],floor_pts[wall_id+1,0],"\n")
-            wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
+            wall_tw[:floor_pts[0,0]] = table[i]
+            wall_tw[floor_pts[i,0]:] = table[i]
+
+    # if max_tw != 0:
+    #     if wall_id == len(floor_pts):
+    #         wall_tw[:floor_pts[0,0]] = 1
+    #         wall_tw[floor_pts[-1,0]:] = 1
+    #     else:
+    #         wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
     wall_tw_tensor = torch.from_numpy(wall_tw)
 
 
