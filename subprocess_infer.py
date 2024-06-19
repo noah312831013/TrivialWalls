@@ -7,13 +7,13 @@ root = "/media/user/WD_BLACK/noah/zind/datasets"
 indices = os.listdir(root)
 for index in tqdm(indices):
     data_dir = os.path.join(root, index, 'panos_aligned')
-    
+    otuput_dir = os.path.join('src/output',index)
     # Constructing the command as a list of strings
     command = [
         'python', 'inference.py',
         '--cfg', 'src/config/zind.yaml',
         '--data_glob', data_dir,
-        '--output_dir', f'src/output/{index}',
+        '--output_dir', otuput_dir,
         '--post_processing', 'manhattan'
     ]
     
