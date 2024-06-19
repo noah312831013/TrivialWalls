@@ -34,8 +34,7 @@ class ZindDataset(BaseDataset):
         data_dir = os.path.join(root_dir)
         img_dir = os.path.join(root_dir, 'image')
         
-        # 保存那些boundary_type error
-        error = []
+
 
         pano_list = read_zind(partition_path=os.path.join(data_dir, f"zind_partition.json"),
                               simplicity_path=os.path.join(data_dir, f"room_shape_simplicity_labels.json"),
@@ -74,7 +73,6 @@ class ZindDataset(BaseDataset):
             if not filter_self_intersection(pano['corners']):
                 logger.warning(f"{pano['id']} self_intersection")
                 invalid_num += 1
-                error.append(pano['img_path']+'/'+pano['id'])
                 continue
 
             if 'trivialWalls' not in pano:
@@ -92,12 +90,12 @@ class ZindDataset(BaseDataset):
                 invalid_num +=1
                 logger.warning(f"{pano['id']} boundary error!!")
                 continue
-
+            
             self.data.append(pano)
 
-        with open('./error.txt','w') as file:
-            for pano in error:
-                file.write(pano+'\n')
+        with open('./partition.txt','w') as file:
+            for pano in self.data:
+                file.write(pano['image_path']+'\n')
         logger.info(
             f"Build dataset mode: {self.mode} max_wall_num: {self.max_wall_num} valid: {len(self.data)} invalid: {invalid_num} error: {len(error)}")
 
