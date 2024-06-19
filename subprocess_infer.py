@@ -8,7 +8,7 @@ with open(root+'/zind_partition.json','r') as file:
     partition = json.load(file)
 test = partition['test']
 for index in tqdm(test):
-    data_dir = os.path.join(root, index)
+    data_dir = os.path.join(root, index, 'panos_aligned')
     
     # Constructing the command as a list of strings
     command = [
