@@ -5,7 +5,7 @@ import json
 
 root = "/media/user/WD_BLACK/noah/zind/datasets"
 indices = os.listdir(root)
-with open(root+'zind_partition.json') as file:
+with open(root+'/zind_partition.json') as file:
     data = json.load(file)
 test = data['test']
 for index in tqdm(test):
