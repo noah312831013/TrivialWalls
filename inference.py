@@ -296,66 +296,36 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
            continue
        tw = cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        table.append(tw)
-       if tw > max_tw:
-           max_tw = tw
-           wall_id = i
        
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     table.append(last_tw)
     table = np.array(table)
     table = np.clip(table, 0, 1)
+    bin_table = [1 if a >= 0.5 else 0 for a in table]
 
+    with open(f'{name}_TW.txt','w') as file:
+        for num in bin_table:
+            file.write(str(num)+'\n')
+    print(f"{name} processed")
 
-    #table = table/table.max() # 0~1
-
-    if last_tw > max_tw:
-        max_tw = last_tw
-        wall_id = len(floor_pts)
-
-    for i in range(len(table)):
-        if i != len(table)-1:
-            wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
-        else:
-            wall_tw[:floor_pts[0,0]] = table[i]
-            wall_tw[floor_pts[i,0]:] = table[i]
-
-    # if max_tw != 0:
-    #     if wall_id == len(floor_pts):
-    #         wall_tw[:floor_pts[0,0]] = 1
-    #         wall_tw[floor_pts[-1,0]:] = 1
+    # for i in range(len(table)):
+    #     if i != len(table)-1:
+    #         wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
     #     else:
-    #         wall_tw[floor_pts[wall_id,0]:floor_pts[wall_id+1,0]] = 1
-    wall_tw_tensor = torch.from_numpy(wall_tw)
+    #         wall_tw[:floor_pts[0,0]] = table[i]
+    #         wall_tw[floor_pts[i,0]:] = table[i]
+    # wall_tw_tensor = torch.from_numpy(wall_tw)
 
 
 
-    dt['trivialWalls'][0] = wall_tw_tensor
-    save_name = name+"_pred.png"
+    # dt['trivialWalls'][0] = wall_tw_tensor
+    # save_name = name+"_pred.png"
 
-    visualize_2d(img, corners, dt,
-                show_depth=show_depth,
-                show_floorplan=show_floorplan,
-                show=show,
-                save_path=os.path.join(args.output_dir, save_name))
-
-    
-    # temporary, need to integrate to save_pred_json
-    # save_trivialWalls(dt,os.path.join(args.output_dir, f"{name}_tw.txt"))
-
-    # if args.visualize_3d:
-    #     from visualization.visualizer.visualizer import visualize_3d
-    #     visualize_3d(json_data, (img * 255).astype(np.uint8))
-
-    # if args.visualize_3d or args.output_3d:
-    #     dt_boundaries = corners2boundaries(tensor2np(dt['ratio'][0])[0], corners_xyz=output_xyz, step=None,
-    #                                        length=mesh_resolution if 'processed_xyz' in dt else None,
-    #                                        visible=True if 'processed_xyz' in dt else False)
-    #     dt_layout_depth = layout2depth(dt_boundaries, show=False)
-
-    #     create_3d_obj(cv2.resize(img, dt_layout_depth.shape[::-1]), dt_layout_depth,
-    #                   save_path=os.path.join(args.output_dir, f"{name}_3d{mesh_format}") if args.output_3d else None,
-    #                   mesh=True,  show=args.visualize_3d)
-
+    # visualize_2d(img, corners, dt,
+    #             show_depth=show_depth,
+    #             show_floorplan=show_floorplan,
+    #             show=show,
+    #             save_path=os.path.join(args.output_dir, save_name))
 
 if __name__ == '__main__':
     logger = get_logger()
