@@ -97,7 +97,7 @@ class ZindDataset(BaseDataset):
             for pano in self.data:
                 file.write(pano['img_path']+'\n')
         logger.info(
-            f"Build dataset mode: {self.mode} max_wall_num: {self.max_wall_num} valid: {len(self.data)} invalid: {invalid_num} error: {len(error)}")
+            f"Build dataset mode: {self.mode} max_wall_num: {self.max_wall_num} valid: {len(self.data)} invalid: {invalid_num}")
 
     def __getitem__(self, idx):
         pano = self.data[idx]
