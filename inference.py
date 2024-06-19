@@ -187,28 +187,28 @@ def inference():
 
     bar = tqdm(zip(img_paths,corners_paths), ncols=100)
     for img_path, corners_path in bar:
-        if img_path in test_partition:
-            if not os.path.isfile(img_path):
-                logger.error('The {} not is file'.format(img_path))
-                continue
-            name = os.path.basename(img_path).split('.')[0]
-            bar.set_description(name)
-            img = np.array(Image.open(img_path).resize((1024, 512), Image.Resampling.BICUBIC))[..., :3]
+        #if img_path in test_partition:
+        if not os.path.isfile(img_path):
+            logger.error('The {} not is file'.format(img_path))
+            continue
+        name = os.path.basename(img_path).split('.')[0]
+        bar.set_description(name)
+        img = np.array(Image.open(img_path).resize((1024, 512), Image.Resampling.BICUBIC))[..., :3]
 
-            # corners format:
-            # pixel coordinate (512,1024)
-            # [ceiling,floor]
-            corners = np.loadtxt(corners_path)/ img.shape[:2][::-1]
-            floor_uv = corners[len(corners)//2:]
-            if args.post_processing is not None and 'manhattan' in args.post_processing:
-                bar.set_description("Preprocessing")
-                rotation = calc_rotation(floor_uv)
-                shift = math.modf(rotation / (2 * np.pi) + 1)[0]
-                img = np.roll(img, round(shift * img.shape[1]), axis=1)
-                corners[:, 0] = np.modf(corners[:, 0] + shift)[0]
+        # corners format:
+        # pixel coordinate (512,1024)
+        # [ceiling,floor]
+        corners = np.loadtxt(corners_path)/ img.shape[:2][::-1]
+        floor_uv = corners[len(corners)//2:]
+        if args.post_processing is not None and 'manhattan' in args.post_processing:
+            bar.set_description("Preprocessing")
+            rotation = calc_rotation(floor_uv)
+            shift = math.modf(rotation / (2 * np.pi) + 1)[0]
+            img = np.roll(img, round(shift * img.shape[1]), axis=1)
+            corners[:, 0] = np.modf(corners[:, 0] + shift)[0]
 
-            img = (img / 255.0).astype(np.float32)
-            run_one_inference(img, corners, model, args, name, logger)
+        img = (img / 255.0).astype(np.float32)
+        run_one_inference(img, corners, model, args, name, logger)
 
 
 def inference_dataset(dataset):
