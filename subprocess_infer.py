@@ -1,11 +1,13 @@
 import os
 import subprocess
 from tqdm import tqdm  # Assuming you want to use tqdm for progress tracking
+import json
 
 root = "/media/user/WD_BLACK/noah/zind/datasets"
-indices = os.listdir(root)
-
-for index in tqdm(indices):
+with open(root+'zind_partition.json','r') as file:
+    partition = json.load(file)
+test = partition['test']
+for index in tqdm(test):
     data_dir = os.path.join(root, index)
     
     # Constructing the command as a list of strings
