@@ -172,6 +172,7 @@ def save_trivialWalls(dt,save_path):
         file.write(str(dt['trivialWalls'][0]))
 
 def inference():
+    test_partition = set(np.loadtxt('./partition.txt'))
     if len(img_paths) == 0 :
         logger.error('No images found')
         return
@@ -182,6 +183,8 @@ def inference():
 
     bar = tqdm(zip(img_paths,corners_paths), ncols=100)
     for img_path, corners_path in bar:
+        if img_path not in test_partition:
+            continue
         if not os.path.isfile(img_path):
             logger.error('The {} not is file'.format(img_path))
             continue
