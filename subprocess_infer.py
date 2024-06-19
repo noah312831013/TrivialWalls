@@ -5,7 +5,10 @@ import json
 
 root = "/media/user/WD_BLACK/noah/zind/datasets"
 indices = os.listdir(root)
-for index in tqdm(indices):
+with open(root+'zind_partition.json') as file:
+    data = json.load(file)
+test = data['test']
+for index in tqdm(test):
     data_dir = os.path.join(root, index, 'panos_aligned')
     otuput_dir = os.path.join('src/output',index)
     # Constructing the command as a list of strings

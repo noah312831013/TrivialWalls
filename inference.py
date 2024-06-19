@@ -209,8 +209,6 @@ def inference():
 
             img = (img / 255.0).astype(np.float32)
             run_one_inference(img, corners, model, args, name, logger)
-        else:
-            print(f'{name} is not in test')
 
 
 def inference_dataset(dataset):
