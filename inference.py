@@ -341,7 +341,7 @@ if __name__ == '__main__':
 
     model, _, _, _ = build_model(config, logger)
     os.makedirs(args.output_dir, exist_ok=True)
-    img_paths = sorted(glob.glob(args.data_glob+'/*.jpg'))
+    img_paths = sorted(glob.glob(args.data_glob+'/*.png'))
     corners_paths = sorted(glob.glob(args.data_glob+'/*.txt'))
     inference()
 
