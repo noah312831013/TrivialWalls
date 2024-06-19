@@ -13,7 +13,7 @@ for index in tqdm(indices):
         'python', 'inference.py',
         '--cfg', 'src/config/zind.yaml',
         '--data_glob', data_dir,
-        '--output_dir', 'src/output',
+        '--output_dir', f'src/output/{index}',
         '--post_processing', 'manhattan'
     ]
     
