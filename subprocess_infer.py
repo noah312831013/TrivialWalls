@@ -4,7 +4,7 @@ from tqdm import tqdm  # Assuming you want to use tqdm for progress tracking
 import json
 
 root = "/media/user/WD_BLACK/noah/zind/datasets"
-with open(root+'zind_partition.json','r') as file:
+with open(root+'/zind_partition.json','r') as file:
     partition = json.load(file)
 test = partition['test']
 for index in tqdm(test):
