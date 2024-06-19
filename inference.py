@@ -301,31 +301,31 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     table.append(last_tw)
     table = np.array(table)
     table = np.clip(table, 0, 1)
-    bin_table = [1 if a >= 0.5 else 0 for a in table]
 
-    with open(f'{name}_TW.txt','w') as file:
-        for num in bin_table:
-            file.write(str(num)+'\n')
-    print(f"{name} processed")
+    # bin_table = [1 if a >= 0.5 else 0 for a in table]
+    # with open(f'{name}_TW.txt','w') as file:
+    #     for num in bin_table:
+    #         file.write(' '.join(map(str, num)+'\n'))
+    # print(f"{name} processed")
 
-    # for i in range(len(table)):
-    #     if i != len(table)-1:
-    #         wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
-    #     else:
-    #         wall_tw[:floor_pts[0,0]] = table[i]
-    #         wall_tw[floor_pts[i,0]:] = table[i]
-    # wall_tw_tensor = torch.from_numpy(wall_tw)
+    for i in range(len(table)):
+        if i != len(table)-1:
+            wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
+        else:
+            wall_tw[:floor_pts[0,0]] = table[i]
+            wall_tw[floor_pts[i,0]:] = table[i]
+    wall_tw_tensor = torch.from_numpy(wall_tw)
 
 
 
-    # dt['trivialWalls'][0] = wall_tw_tensor
-    # save_name = name+"_pred.png"
+    dt['trivialWalls'][0] = wall_tw_tensor
+    save_name = name+"_pred.png"
 
-    # visualize_2d(img, corners, dt,
-    #             show_depth=show_depth,
-    #             show_floorplan=show_floorplan,
-    #             show=show,
-    #             save_path=os.path.join(args.output_dir, save_name))
+    visualize_2d(img, corners, dt,
+                show_depth=show_depth,
+                show_floorplan=show_floorplan,
+                show=show,
+                save_path=os.path.join(args.output_dir, save_name))
 
 if __name__ == '__main__':
     logger = get_logger()
