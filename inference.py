@@ -342,17 +342,17 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     table = np.clip(table, 0, 1)
     visible_table = np.clip(visible_table, 0, 1)
     # 存TW 以牆壁為單位
-    bin_table = [1 if a >= 0.5 else 0 for a in visible_table]
+    bin_table = [1 if a >= 0.5 else 0 for a in table]
     with open(os.path.join(args.output_dir,f'{name}_TW.txt'), 'w') as file:
         for num in bin_table:
             file.write(f'{num}\n')  # Write each number followed by a newline
     # 存後處理過後的1d vector 回預測結果 (ie. 把平均值大於0.5的標記成1, 反之)
-    for i in range(len(table)):
-        if i != len(table)-1:
-            wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
+    for i in range(len(visible_table)):
+        if i != len(visible_table)-1:
+            wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = visible_table[i]
         else:
-            wall_tw[:floor_pts[0,0]] = table[i]
-            wall_tw[floor_pts[i,0]:] = table[i]
+            wall_tw[:floor_pts[0,0]] = visible_table[i]
+            wall_tw[floor_pts[i,0]:] = visible_table[i]
     wall_tw_tensor = torch.from_numpy(wall_tw)
 
 
