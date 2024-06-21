@@ -234,13 +234,16 @@ def cal_tw(x1, x2, dt, last_wall=False):
             raise IndexError("x1 and x2 must be within the bounds of dt")
 
         if x1 == x2:
-            raise ValueError("x1 and x2 cannot be the same value")
+            # case 是 本來的牆間距超級近 而且又不是逆向（visible）在縮放到256後變一樣
+            return 0
+            #raise ValueError("x1 and x2 cannot be the same value")
 
         if not last_wall:
             avg_tw = np.sum(dt[x1:x2]) / (x2 - x1)
         else:
             if x1 == 0 and x2 == len(dt):
-                raise ValueError("For the last wall case, x1 and x2 cannot be at the array bounds")
+                return 0
+                #raise ValueError("For the last wall case, x1 and x2 cannot be at the array bounds")
 
             avg_tw = (np.sum(dt[:x1]) + np.sum(dt[x2:])) / (x1 + (256 - x2))
 
@@ -351,6 +354,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
         if i != len(visible_table)-1:
             wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = visible_table[i]
         else:
+            # 跨越界線牆
             wall_tw[:floor_pts[0,0]] = visible_table[i]
             wall_tw[floor_pts[i,0]:] = visible_table[i]
     wall_tw_tensor = torch.from_numpy(wall_tw)
