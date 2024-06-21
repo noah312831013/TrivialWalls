@@ -172,11 +172,6 @@ def save_trivialWalls(dt,save_path):
         file.write(str(dt['trivialWalls'][0]))
 
 def inference():
-    with open('./partition.txt','r') as file:
-        test_partition = []
-        for line in file:
-            test_partition.append(line.replace('\n',''))
-    test_partition = set(test_partition)
     if len(img_paths) == 0 :
         logger.error('No images found')
         return
@@ -187,7 +182,6 @@ def inference():
 
     bar = tqdm(zip(img_paths,corners_paths), ncols=100)
     for img_path, corners_path in bar:
-        #if img_path in test_partition:
         if not os.path.isfile(img_path):
             logger.error('The {} not is file'.format(img_path))
             continue
@@ -217,16 +211,48 @@ def inference_dataset(dataset):
         bar.set_description(data['id'])
         run_one_inference(data['image'].transpose(1, 2, 0), model, args, name=data['id'], logger=logger)
 
+# 舊版
+# def cal_tw(x1,x2,dt,last_wall = False):
+#     x1 = int(x1)
+#     x2 = int(x2)
+#     if not last_wall:
+#         avg_tw = np.sum(dt[x1:x2])/(x2-x1)
+#     else:
+#         avg_tw = (np.sum(dt[:x1])+np.sum(dt[x2:]))/(x1+(256-x2))
 
-def cal_tw(x1,x2,dt,last_wall = False):
-    x1 = int(x1)
-    x2 = int(x2)
-    if not last_wall:
-        avg_tw = np.sum(dt[x1:x2])/(x2-x1)
-    else:
-        avg_tw = (np.sum(dt[:x1])+np.sum(dt[x2:]))/(x1+(256-x2))
+#     return avg_tw
 
-    return avg_tw
+def cal_tw(x1, x2, dt, last_wall=False):
+    try:
+        x1 = int(x1)
+        x2 = int(x2)
+
+        if not isinstance(dt, np.ndarray):
+            raise ValueError("Input dt must be a numpy array")
+
+        if x1 < 0 or x2 < 0 or x1 > len(dt) or x2 > len(dt):
+            raise IndexError("x1 and x2 must be within the bounds of dt")
+
+        if x1 == x2:
+            raise ValueError("x1 and x2 cannot be the same value")
+
+        if not last_wall:
+            avg_tw = np.sum(dt[x1:x2]) / (x2 - x1)
+        else:
+            if x1 == 0 and x2 == len(dt):
+                raise ValueError("For the last wall case, x1 and x2 cannot be at the array bounds")
+
+            avg_tw = (np.sum(dt[:x1]) + np.sum(dt[x2:])) / (x1 + (256 - x2))
+
+        return avg_tw
+
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+    except IndexError as ie:
+        print(f"IndexError: {ie}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    return None
 
 def get_depth(corners, plan_y=1, length=256, visible=True):
     visible_floor_boundary = corners2boundary(corners, length=length, visible=visible)
@@ -307,13 +333,12 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     table.append(last_tw)
     table = np.array(table)
     table = np.clip(table, 0, 1)
-
-    # bin_table = [1 if a >= 0.5 else 0 for a in table]
-    # with open(f'{name}_TW.txt','w') as file:
-    #     for num in bin_table:
-    #         file.write(' '.join(map(str, num)+'\n'))
-    # print(f"{name} processed")
-
+    # 存TW 以牆壁為單位
+    bin_table = [1 if a >= 0.5 else 0 for a in table]
+    with open(os.path.join(args.output_dir,f'{name}_TW.txt'),'w') as file:
+        for num in bin_table:
+            file.write(' '.join(map(str, num)+'\n'))
+    # 存後處理過後的1d vector 回預測結果 (ie. 把平均值大於0.5的標記成1, 反之)
     for i in range(len(table)):
         if i != len(table)-1:
             wall_tw[floor_pts[i,0]:floor_pts[i+1,0]] = table[i]
