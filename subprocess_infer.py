@@ -4,12 +4,18 @@ from tqdm import tqdm  # Assuming you want to use tqdm for progress tracking
 import json
 
 root = "/media/user/WD_BLACK/noah/zind/datasets"
-indices = os.listdir(root)
-with open(root+'/zind_partition.json') as file:
-    data = json.load(file)
-test = data['test']
-for index in tqdm(test):
-    data_dir = os.path.join(root, index, 'panos_aligned')
+
+# read test partition list
+with open('./partition.txt', 'r') as file:
+    test_partition = []
+    for line in file:
+        temp = line.split('/')
+        index_id = temp[7]
+        test_partition.append(index_id)
+    test_partition = set(test_partition)
+    
+for index in tqdm(test_partition):
+    data_dir = os.path.join(root, index, 'panos_test')
     otuput_dir = os.path.join('src/output',index)
     # Constructing the command as a list of strings
     command = [

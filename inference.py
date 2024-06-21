@@ -324,7 +324,7 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     table = []
     for i in range(len(floor_pts)-1):
        # occluded wall
-       if floor_pts[i,0] > floor_pts[i+1,0]:
+       if floor_pts[i,0] >= floor_pts[i+1,0]:
            continue
        tw = cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
        table.append(tw)
@@ -371,7 +371,7 @@ if __name__ == '__main__':
 
     model, _, _, _ = build_model(config, logger)
     os.makedirs(args.output_dir, exist_ok=True)
-    img_paths = sorted(glob.glob(args.data_glob+'/*.png'))
+    img_paths = sorted(glob.glob(args.data_glob + '/*.jpg') + glob.glob(args.data_glob + '/*.png'))
     corners_paths = sorted(glob.glob(args.data_glob+'/*.txt'))
     inference()
 
