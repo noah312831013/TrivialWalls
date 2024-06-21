@@ -321,20 +321,28 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     wall_tw = np.zeros(256)
     max_tw = 0
     wall_id = 0
+    # table是用來記所有牆壁的TW值包括遮擋牆，而visible的則是用來visualize用的，所以不需要記遮擋牆
     table = []
+    visible_table = []
     for i in range(len(floor_pts)-1):
-       # occluded wall
-       if floor_pts[i,0] >= floor_pts[i+1,0]:
-           continue
-       tw = cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
-       table.append(tw)
+        # occluded wall
+        if floor_pts[i,0] >= floor_pts[i+1,0]:
+            # 遮擋的一率為零
+            table.append(0)
+        else:
+            tw = cal_tw(floor_pts[i,0],floor_pts[i+1,0],dt['trivialWalls'][0].cpu().numpy())
+            table.append(tw)
+            visible_table.append(tw)
        
     last_tw = cal_tw(floor_pts[0,0],floor_pts[-1,0],dt['trivialWalls'][0].cpu().numpy(),last_wall=True)
     table.append(last_tw)
+    visible_table.append(last_tw)
     table = np.array(table)
+    visible_table = np.array(visible_table)
     table = np.clip(table, 0, 1)
+    visible_table = np.clip(visible_table, 0, 1)
     # 存TW 以牆壁為單位
-    bin_table = [1 if a >= 0.5 else 0 for a in table]
+    bin_table = [1 if a >= 0.5 else 0 for a in visible_table]
     with open(os.path.join(args.output_dir,f'{name}_TW.txt'), 'w') as file:
         for num in bin_table:
             file.write(f'{num}\n')  # Write each number followed by a newline
