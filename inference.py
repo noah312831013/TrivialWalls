@@ -335,9 +335,9 @@ def run_one_inference(img, corners, model, args, name, logger, show=False, show_
     table = np.clip(table, 0, 1)
     # 存TW 以牆壁為單位
     bin_table = [1 if a >= 0.5 else 0 for a in table]
-    with open(os.path.join(args.output_dir,f'{name}_TW.txt'),'w') as file:
+    with open(os.path.join(args.output_dir,f'{name}_TW.txt'), 'w') as file:
         for num in bin_table:
-            file.write(' '.join(map(str, num)+'\n'))
+            file.write(f'{num}\n')  # Write each number followed by a newline
     # 存後處理過後的1d vector 回預測結果 (ie. 把平均值大於0.5的標記成1, 反之)
     for i in range(len(table)):
         if i != len(table)-1:
