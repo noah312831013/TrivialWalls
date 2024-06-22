@@ -53,7 +53,7 @@ def plot_confusion_matrix(confusion_matrix, output_file):
     
     for i, v in enumerate(values):
         ax.text(v + 1, i, str(v), color='black', va='center')
-    
+    plt.tight_layout()
     plt.savefig(output_file)
     plt.close()
 
@@ -95,6 +95,7 @@ def main():
     plot_confusion_matrix(summary, plot_filename)
 
     print(summary)
+    print(f'The result was saved in {result_root}.')
 
 if __name__ == '__main__':
     main()
