@@ -2,6 +2,8 @@ import numpy as np
 import os
 import glob
 from tqdm import tqdm
+import json
+import matplotlib.pyplot as plt
 
 def analyze_files(file1, file2):
     # Load the files
@@ -36,6 +38,25 @@ def analyze_files(file1, file2):
         "True Negative": true_negative
     }
 
+def save_json(data, filename):
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def plot_confusion_matrix(confusion_matrix, output_file):
+    labels = ["True Positive", "False Positive", "False Negative", "True Negative"]
+    values = [confusion_matrix[label] for label in labels]
+    
+    fig, ax = plt.subplots()
+    ax.barh(labels, values, color=['green', 'red', 'red', 'green'])
+    ax.set_xlabel('Count')
+    ax.set_title('Confusion Matrix Summary')
+    
+    for i, v in enumerate(values):
+        ax.text(v + 1, i, str(v), color='black', va='center')
+    
+    plt.savefig(output_file)
+    plt.close()
+
 def main():
     root = './src/output'
     gt_root = '/home/user/noah/trivial_wall/data/Q2_TW'
@@ -62,8 +83,13 @@ def main():
             for key in summary:
                 summary[key] += result[key]
     
-    # Print or return the summary
-    print("Summary:", summary)
+    # Save summary to JSON file
+    json_filename = 'confusion_matrix_summary.json'
+    save_json(summary, json_filename)
+    
+    # Save plot to image file
+    plot_filename = 'confusion_matrix_summary.png'
+    plot_confusion_matrix(summary, plot_filename)
 
 if __name__ == '__main__':
     main()
