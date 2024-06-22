@@ -46,13 +46,37 @@ def plot_confusion_matrix(confusion_matrix, output_file):
     labels = ["True Positive", "False Positive", "False Negative", "True Negative"]
     values = [confusion_matrix[label] for label in labels]
     
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 6))  # Adjust the figure size as needed
     ax.barh(labels, values, color=['green', 'red', 'red', 'green'])
     ax.set_xlabel('Count')
     ax.set_title('Confusion Matrix Summary')
     
     for i, v in enumerate(values):
         ax.text(v + 1, i, str(v), color='black', va='center')
+    
+    plt.tight_layout()  # Automatically adjust subplot parameters to give specified padding
+    plt.savefig(output_file)
+    plt.close()
+
+def plot_2x2_confusion_matrix(confusion_matrix, output_file):
+    matrix = [
+        [confusion_matrix["True Positive"], confusion_matrix["False Negative"]],
+        [confusion_matrix["False Positive"], confusion_matrix["True Negative"]]
+    ]
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    cax = ax.matshow(matrix, cmap=plt.cm.Blues)
+    plt.colorbar(cax)
+
+    for (i, j), val in np.ndenumerate(matrix):
+        ax.text(j, i, f'{val}', ha='center', va='center', color='black')
+    
+    ax.set_xticklabels(['', 'True', 'False'])
+    ax.set_yticklabels(['', 'True', 'False'])
+    ax.set_xlabel('Ground Truth')
+    ax.set_ylabel('Predicted')
+    ax.set_title('2x2 Confusion Matrix')
+    
     plt.tight_layout()
     plt.savefig(output_file)
     plt.close()
@@ -83,19 +107,22 @@ def main():
             for key in summary:
                 summary[key] += result[key]
     
-
-    result_root = './cofusion_matrix'
-    os.makedirs(result_root,exist_ok=True)
+    # Ensure output directory exists
+    output_dir = './confusion_results'
+    os.makedirs(output_dir, exist_ok=True)
+    
     # Save summary to JSON file
-    json_filename = os.path.join(result_root, 'confusion_matrix_summary.json')
+    json_filename = os.path.join(output_dir, 'confusion_matrix_summary.json')
     save_json(summary, json_filename)
     
-    # Save plot to image file
-    plot_filename = os.path.join(result_root, 'confusion_matrix_summary.png')
+    # Save plot to image files
+    plot_filename = os.path.join(output_dir, 'confusion_matrix_summary.png')
     plot_confusion_matrix(summary, plot_filename)
+    
+    plot_2x2_filename = os.path.join(output_dir, 'confusion_matrix_2x2.png')
+    plot_2x2_confusion_matrix(summary, plot_2x2_filename)
 
-    print(summary)
-    print(f'The result was saved in {result_root}.')
+    print(f'The result was saved in {output_dir}')
 
 if __name__ == '__main__':
     main()
