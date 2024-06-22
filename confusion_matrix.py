@@ -83,13 +83,18 @@ def main():
             for key in summary:
                 summary[key] += result[key]
     
+
+    result_root = './cofusion_matrix'
+    os.mkdirs(result_root,exist_ok=True)
     # Save summary to JSON file
-    json_filename = 'confusion_matrix_summary.json'
+    json_filename = os.path.join(result_root, 'confusion_matrix_summary.json')
     save_json(summary, json_filename)
     
     # Save plot to image file
-    plot_filename = 'confusion_matrix_summary.png'
+    plot_filename = os.path.join(result_root, 'confusion_matrix_summary.png')
     plot_confusion_matrix(summary, plot_filename)
+    
+    print(summary)
 
 if __name__ == '__main__':
     main()
